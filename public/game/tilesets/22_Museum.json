@@ -1,0 +1,14 @@
+{ "columns":16,
+ "image":"22_Museum.png",
+ "imageheight":1952,
+ "imagewidth":256,
+ "margin":0,
+ "name":"22_Museum",
+ "spacing":0,
+ "tilecount":1952,
+ "tiledversion":"1.10.2",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

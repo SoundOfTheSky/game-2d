@@ -1,0 +1,235 @@
+{
+    "activeFile": "maps/rodosskaya.json",
+    "expandedProjectPaths": [
+        ".",
+        "maps"
+    ],
+    "fileStates": {
+        "maps/2_LivingRoom_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "maps/rodosskaya.json": {
+            "scale": 1,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1192.5,
+                "y": 1743
+            }
+        },
+        "tilesets/10_Birthday_party_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/10_Vehicles_16x16.json": {
+            "scaleInDock": 1
+        },
+        "tilesets/11_Camping_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/11_Halloween_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/12_Hotel_and_Hospital_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/12_Kitchen_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/13_Conference_Hall_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/13_School_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/14_Basement_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/14_Swimming_Pool_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/15_Christmas_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/15_Police_Station_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/16_Grocery_store_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/16_Office_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/17_Garden_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/17_Visibile_Upstairs_System_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/18_Fire_Station_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/18_Jail_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/19_Graveyard_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/19_Hospital_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/1_Generic_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/1_Terrains_and_Fences_16x16.json": {
+            "scaleInDock": 1
+        },
+        "tilesets/20_Japanese_interiors.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/20_Subway_and_Train_Station_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/21_Beach_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/21_Clothing_Store.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/22_Museum.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/23_Television_and_Film_Studio.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/24_Ice_Cream_Shop.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/25_Shooting_Range.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/26_Condominium.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/2_City_Terrains_16x16.json": {
+            "scaleInDock": 1
+        },
+        "tilesets/2_LivingRoom_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/3_Bathroom_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/3_City_Props_16x16.json": {
+            "scaleInDock": 1
+        },
+        "tilesets/4_Bedroom_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/4_Generic_Buildings_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/5_Classroom_and_library_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/5_Floor_Modular_Buildings_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/6_Garage_Sales_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/6_Garage_Sales_16x16.tsj": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/6_Music_and_sport_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/7_Art_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/7_Villas_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/8_Gym_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/8_Worksite_16x16.json": {
+            "scaleInDock": 1
+        },
+        "tilesets/9_Fishing_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/9_Shopping_Center_and_Markets_16x16.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tilesets/custom.json": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "C:/YandexDisk/GameAssets/game/tilesets",
+    "openFiles": [
+        "maps/rodosskaya.json"
+    ],
+    "project": "game.tiled-project",
+    "recentFiles": [
+        "maps/rodosskaya.json",
+        "tilesets/26_Condominium.json",
+        "tilesets/25_Shooting_Range.json",
+        "tilesets/22_Museum.json",
+        "tilesets/24_Ice_Cream_Shop.json",
+        "tilesets/23_Television_and_Film_Studio.json",
+        "tilesets/21_Clothing_Store.json",
+        "tilesets/20_Japanese_interiors.json",
+        "tilesets/19_Hospital_16x16.json",
+        "tilesets/2_LivingRoom_16x16.json",
+        "tilesets/3_Bathroom_16x16.json",
+        "tilesets/4_Bedroom_16x16.json"
+    ],
+    "tileset.lastUsedFormat": "json",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

@@ -1,0 +1,14 @@
+{ "columns":32,
+ "image":"./8_Worksite_16x16.png",
+ "imageheight":320,
+ "imagewidth":512,
+ "margin":0,
+ "name":"8_Worksite_16x16",
+ "spacing":0,
+ "tilecount":640,
+ "tiledversion":"1.10.2",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

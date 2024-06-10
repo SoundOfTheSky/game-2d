@@ -1,0 +1,14 @@
+{ "columns":59,
+ "image":"./2_City_Terrains_16x16.png",
+ "imageheight":1168,
+ "imagewidth":944,
+ "margin":0,
+ "name":"2_City_Terrains_16x16",
+ "spacing":0,
+ "tilecount":4307,
+ "tiledversion":"1.10.2",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

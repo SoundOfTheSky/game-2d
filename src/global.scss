@@ -1,0 +1,43 @@
+@use 'vars' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  color: inherit;
+  font-family: inherit;
+}
+
+html {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  background: $color-background;
+  color: $color-text;
+  font-family: 'Segoe UI', tahoma, geneva, verdana, sans-serif;
+}
+
+/* stylelint-disable-next-line selector-max-id */
+#root {
+  height: 100dvh;
+}
+
+button {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.em {
+  height: 1em;
+}
+
+canvas {
+  height: 100dvh;
+  width: 100dvw;
+}
