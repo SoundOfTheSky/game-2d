@@ -8,51 +8,55 @@ import { Ticker } from '../ticker';
 import Entity from './entity';
 
 export enum Direction {
-  UP,
-  RIGHT,
-  DOWN,
-  LEFT,
+  UP = 'Up',
+  DOWN = 'Down',
+  RIGHT = 'Right',
+  LEFT = 'Left',
 }
 
 export default class Player extends Entity<AnimatedImg, string> {
   public direction = Direction.DOWN;
-  public speed = 0.05;
+  public speed = 0.07;
 
   public constructor(game: Game, parent: Ticker, priority?: number) {
     const source = document.createElement('img');
-    source.src = '/game/mc.png';
+    source.src = '/game/mc.webp';
     super(
       game,
       parent,
       new AnimatedImg(game, game, {
-        idle2: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 6, 11, 175, true),
-        idle1: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 0, 5, 175, true),
-        idle3: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 0, 5, 175, true),
-        idle0: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 12, 17, 175, true),
-        walk2: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 6, 11, 175, true),
-        walk1: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 0, 5, 175, true),
-        walk3: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 0, 5, 175, true),
-        walk0: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 12, 17, 175, true),
+        walkUp: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 0, 5, 120, true),
+        walkDown: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 6, 11, 120, true),
+        walkRight: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 12, 17, 120, true),
+        walkLeft: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 18, 23, 120, true),
+        idleUp: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 24, 28, 120, true),
+        idleDown: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 29, 33, 120, true),
+        idleRight: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 34, 38, 120, true),
+        idleLeft: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 39, 43, 120, true),
+        emoteJump: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 44, 49, 120, true),
       }),
       priority,
     );
+    this.img.animations.idleUp[0].time = 1200;
+    this.img.animations.idleDown[0].time = 1200;
+    this.img.animations.idleRight[0].time = 1200;
+    this.img.animations.idleLeft[0].time = 1200;
     this.hitboxes.push(new Circle(new Vector2(8, 24), 8));
     this.name = 'player';
   }
 
   public tick(deltaTime: number): void {
-    //console.log(this.pos.x, this.pos.y, this.velocity.x, this.velocity.y);
-    this.velocity.x = 0;
-    this.velocity.y = 0;
-    if (this.game.input.has('w')) this.velocity.y -= 1;
-    if (this.game.input.has('s')) this.velocity.y += 1;
-    if (this.game.input.has('a')) this.velocity.x -= 1;
-    if (this.game.input.has('d')) this.velocity.x += 1;
-    if (this.velocity.x > 0) this.direction = Direction.RIGHT;
-    else if (this.velocity.x !== 0) this.direction = Direction.LEFT;
-    else if (this.velocity.y > 0) this.direction = Direction.DOWN;
-    else if (this.velocity.y !== 0) this.direction = Direction.UP;
-    this.velocity.normalize().scaleN(this.speed);
+    this.velocity.x = this.game.input.move.x;
+    this.velocity.y = this.game.input.move.y;
+    if (this.velocity.x !== 0 || this.velocity.y !== 0) {
+      if (Math.abs(this.velocity.y) > Math.abs(this.velocity.x)) {
+        if (this.velocity.y > 0) this.direction = Direction.DOWN;
+        else this.direction = Direction.UP;
+      } else if (this.velocity.x > 0) this.direction = Direction.RIGHT;
+      else this.direction = Direction.LEFT;
+
+      this.velocity.normalize().scaleN(this.speed);
+    }
     this.updateAnimation();
     super.tick(deltaTime);
   }
