@@ -48,12 +48,6 @@ export default class Input implements Tickable, Cleanuppable {
     window.addEventListener('keyup', this.onKeyup.bind(this), {
       passive: true,
     });
-    window.addEventListener('gamepadconnected', this.onGamepadConnected.bind(this), {
-      passive: true,
-    });
-    window.addEventListener('gamepaddisconnected', this.onGamepadDisconnected.bind(this), {
-      passive: true,
-    });
     this.game.canvas.addEventListener('mousemove', this.onMousemove.bind(this), {
       passive: true,
     });
@@ -87,12 +81,10 @@ export default class Input implements Tickable, Cleanuppable {
     if (this.pressedKeys.has('right')) this.move.x += 1;
     if (this.pressedKeys.has('left')) this.move.x -= 1;
     this.tickGamepads();
-    this.move.normalize();
+    this.move.normalize(true);
   }
 
   public cleanup() {
-    window.removeEventListener('gamepadconnected', this.onGamepadConnected.bind(this));
-    window.removeEventListener('gamepaddisconnected', this.onGamepadDisconnected.bind(this));
     window.removeEventListener('keydown', this.onKeydown.bind(this));
     window.removeEventListener('keyup', this.onKeyup.bind(this));
     this.game.canvas.removeEventListener('mousemove', this.onMousemove.bind(this));
@@ -105,18 +97,33 @@ export default class Input implements Tickable, Cleanuppable {
     return t === 1 || t > 30;
   }
 
+  public vibrate(power: number, duration: number) {
+    const gamepads = navigator.getGamepads();
+    for (let i = 0; i < gamepads.length; i++) {
+      const gamepad = gamepads[i];
+      if (!gamepad) continue;
+      console.log('vibrate', gamepad.vibrationActuator);
+      void gamepad.vibrationActuator?.playEffect('dual-rumble', {
+        strongMagnitude: power,
+        duration,
+      });
+    }
+  }
+
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   private tickGamepads() {
-    for (let i = 0; i < this.gamepads.length; i++) {
-      const gamepad = this.gamepads[i];
-      if (!gamepad.connected) continue;
-      if (gamepad.buttons[12]) this.move.y += 1;
-      if (gamepad.buttons[13]) this.move.y -= 1;
-      if (gamepad.buttons[15]) this.move.x += 1;
-      if (gamepad.buttons[14]) this.move.x -= 1;
-      this.move.x = gamepad.axes[0];
-      this.move.y = gamepad.axes[1];
-      this.look.x = gamepad.axes[2];
-      this.look.y = gamepad.axes[3];
+    const gamepads = navigator.getGamepads().filter(Boolean) as Gamepad[];
+    for (let i = 0; i < gamepads.length; i++) {
+      const gamepad = gamepads[i];
+      if (!gamepad || !gamepad.connected) continue;
+      // if (gamepad.buttons[12]) this.move.y += 1;
+      // if (gamepad.buttons[13]) this.move.y -= 1;
+      // if (gamepad.buttons[15]) this.move.x += 1;
+      // if (gamepad.buttons[14]) this.move.x -= 1;
+      if (Math.abs(gamepad.axes[0]) > 0.2) this.move.x = gamepad.axes[0];
+      if (Math.abs(gamepad.axes[1]) > 0.2) this.move.y = gamepad.axes[1];
+      if (Math.abs(gamepad.axes[2]) > 0.2) this.look.x = gamepad.axes[2];
+      if (Math.abs(gamepad.axes[3]) > 0.2) this.look.y = gamepad.axes[3];
       for (let j = 0; j < gamepad.buttons.length; j++) {
         const id = this.mapping[j.toString()];
         if (!id) continue;
@@ -158,13 +165,5 @@ export default class Input implements Tickable, Cleanuppable {
     const id = this.mapping['m' + e.button];
     if (!id) return;
     this.toRemove.add(id);
-  }
-
-  private onGamepadConnected(e: GamepadEvent) {
-    this.gamepads.push(e.gamepad);
-  }
-
-  private onGamepadDisconnected(e: GamepadEvent) {
-    this.gamepads.splice(this.gamepads.indexOf(e.gamepad), 1);
   }
 }

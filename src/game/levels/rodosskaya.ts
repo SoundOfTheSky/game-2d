@@ -12,7 +12,7 @@ export default class Rodosskaya extends Level {
     )!;
     p.pos.x = spawn.x;
     p.pos.y = spawn.y;
-    this.cam.scale = 8;
+    this.cam.scale = 4 * window.devicePixelRatio;
     this.cam.entities.push(p);
     this.cam.pos.x = p.pos.x * this.cam.scale - this.game.canvas.width / 2;
     this.cam.pos.y = p.pos.y * this.cam.scale - this.game.canvas.height / 2;

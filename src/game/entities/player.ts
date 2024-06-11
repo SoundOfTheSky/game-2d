@@ -16,7 +16,7 @@ export enum Direction {
 
 export default class Player extends Entity<AnimatedImg, string> {
   public direction = Direction.DOWN;
-  public speed = 0.07;
+  public speed = 0.05;
 
   public constructor(game: Game, parent: Ticker, priority?: number) {
     const source = document.createElement('img');
@@ -37,6 +37,15 @@ export default class Player extends Entity<AnimatedImg, string> {
       }),
       priority,
     );
+    // const stepVibrate = () => this.game.input.vibrate(0.2, 25);
+    // this.img.animations.walkUp[0].onDraw = stepVibrate;
+    // this.img.animations.walkUp[3].onDraw = stepVibrate;
+    // this.img.animations.walkDown[0].onDraw = stepVibrate;
+    // this.img.animations.walkDown[3].onDraw = stepVibrate;
+    // this.img.animations.walkRight[0].onDraw = stepVibrate;
+    // this.img.animations.walkRight[3].onDraw = stepVibrate;
+    // this.img.animations.walkLeft[0].onDraw = stepVibrate;
+    // this.img.animations.walkLeft[3].onDraw = stepVibrate;
     this.img.animations.idleUp[0].time = 1200;
     this.img.animations.idleDown[0].time = 1200;
     this.img.animations.idleRight[0].time = 1200;
@@ -55,14 +64,21 @@ export default class Player extends Entity<AnimatedImg, string> {
       } else if (this.velocity.x > 0) this.direction = Direction.RIGHT;
       else this.direction = Direction.LEFT;
 
-      this.velocity.normalize().scaleN(this.speed);
+      this.velocity.normalize(true).scaleN(this.speed);
     }
     this.updateAnimation();
     super.tick(deltaTime);
   }
 
   private updateAnimation() {
-    const intendedAnim = (this.velocity.x !== 0 || this.velocity.y !== 0 ? 'walk' : 'idle') + this.direction;
+    const d = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y) / this.speed;
+    let intendedAnim = 'idle';
+    if (d === 0) this.img.speed = 1;
+    else {
+      intendedAnim = 'walk';
+      this.img.speed = d;
+    }
+    intendedAnim += this.direction;
     if (this.img.animation !== intendedAnim) this.img.playAnimation(intendedAnim);
   }
 

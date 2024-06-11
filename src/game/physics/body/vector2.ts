@@ -52,9 +52,9 @@ export default class Vector2 implements IPhysicsBody {
     return this;
   }
 
-  public normalize(): Vector2 {
+  public normalize(onlyDecrease?: boolean): Vector2 {
     const d = Math.sqrt(this.x * this.x + this.y * this.y);
-    if (d !== 0) {
+    if (onlyDecrease ? d > 1 : d !== 0) {
       this.x /= d;
       this.y /= d;
     }

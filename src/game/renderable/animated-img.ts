@@ -10,11 +10,13 @@ export type AnimationFrame = {
   size: Vector2;
   offset: Vector2;
   scale: number;
+  onDraw?: () => unknown;
   time?: number;
 };
 
 export default class AnimatedImg extends Img {
   public animation: string;
+  public speed = 1;
   private frameI = 0;
   private lastFrameChange;
 
@@ -45,14 +47,15 @@ export default class AnimatedImg extends Img {
     while (true) {
       const { time } = animation[this.frameI];
       if (!time) break;
-      timeSinceLastChange -= time;
+      timeSinceLastChange -= time / this.speed;
       if (timeSinceLastChange <= 0) break;
       if (++this.frameI === animation.length) this.frameI = 0;
       changed = true;
     }
     if (changed) {
       const frame = animation[this.frameI];
-      this.lastFrameChange = this.game.time - (frame.time ?? 0) - timeSinceLastChange;
+      frame.onDraw?.();
+      this.lastFrameChange = this.game.time - (frame.time ?? 0) / this.speed - timeSinceLastChange;
       Object.assign(this, frame);
     }
     super.tick();

@@ -13,6 +13,7 @@ export default class Game extends Ticker {
 
   public constructor(public canvas: HTMLCanvasElement) {
     super();
+    window.addEventListener('resize', this.initCanvas.bind(this));
     this.initCanvas();
 
     this.input = this.addTickable(new Input(this, this));
@@ -26,7 +27,7 @@ export default class Game extends Ticker {
     this.tick(0);
   }
 
-  public initCanvas() {
+  private initCanvas() {
     this.boundingBox = this.canvas.getBoundingClientRect();
     this.canvas.width = this.boundingBox.width * window.devicePixelRatio;
     this.canvas.height = this.boundingBox.height * window.devicePixelRatio;
@@ -56,5 +57,10 @@ export default class Game extends Ticker {
       img.onload = () => r(img);
       img.onerror = j;
     });
+  }
+
+  public cleanup(): void {
+    window.removeEventListener('resize', this.initCanvas.bind(this));
+    super.cleanup();
   }
 }
