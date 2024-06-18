@@ -17,10 +17,10 @@ export enum Direction {
 export default class Player extends Entity<AnimatedImg, string> {
   public direction = Direction.DOWN;
   public speed = 0.05;
+  public disabledControlsUntil = 0;
 
   public constructor(game: Game, parent: Ticker, priority?: number) {
-    const source = document.createElement('img');
-    source.src = '/game/mc.webp';
+    const source = game.resources['/game/mc.png'] as HTMLImageElement;
     super(
       game,
       parent,
@@ -33,19 +33,10 @@ export default class Player extends Entity<AnimatedImg, string> {
         idleDown: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 29, 33, 120, true),
         idleRight: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 34, 38, 120, true),
         idleLeft: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 39, 43, 120, true),
-        emoteJump: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 44, 49, 120, true),
+        emoteJump: AnimatedImg.generateAnimation(source, new Vector2(16, 32), 44, 49, 120),
       }),
       priority,
     );
-    // const stepVibrate = () => this.game.input.vibrate(0.2, 25);
-    // this.img.animations.walkUp[0].onDraw = stepVibrate;
-    // this.img.animations.walkUp[3].onDraw = stepVibrate;
-    // this.img.animations.walkDown[0].onDraw = stepVibrate;
-    // this.img.animations.walkDown[3].onDraw = stepVibrate;
-    // this.img.animations.walkRight[0].onDraw = stepVibrate;
-    // this.img.animations.walkRight[3].onDraw = stepVibrate;
-    // this.img.animations.walkLeft[0].onDraw = stepVibrate;
-    // this.img.animations.walkLeft[3].onDraw = stepVibrate;
     this.img.animations.idleUp[0].time = 1200;
     this.img.animations.idleDown[0].time = 1200;
     this.img.animations.idleRight[0].time = 1200;
@@ -55,18 +46,26 @@ export default class Player extends Entity<AnimatedImg, string> {
   }
 
   public tick(deltaTime: number): void {
-    this.velocity.x = this.game.input.move.x;
-    this.velocity.y = this.game.input.move.y;
-    if (this.velocity.x !== 0 || this.velocity.y !== 0) {
-      if (Math.abs(this.velocity.y) > Math.abs(this.velocity.x)) {
-        if (this.velocity.y > 0) this.direction = Direction.DOWN;
-        else this.direction = Direction.UP;
-      } else if (this.velocity.x > 0) this.direction = Direction.RIGHT;
-      else this.direction = Direction.LEFT;
-
-      this.velocity.normalize(true).scaleN(this.speed);
+    if (this.disabledControlsUntil < this.game.time) {
+      if (this.game.input.checkForKeyPlusRepeat('main')) {
+        this.img.playAnimation('emoteJump');
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+        this.disabledControlsUntil = this.game.time + 2000;
+      } else {
+        this.velocity.x = this.game.input.move.x;
+        this.velocity.y = this.game.input.move.y;
+        if (this.velocity.x !== 0 || this.velocity.y !== 0) {
+          if (Math.abs(this.velocity.y) > Math.abs(this.velocity.x)) {
+            if (this.velocity.y > 0) this.direction = Direction.DOWN;
+            else this.direction = Direction.UP;
+          } else if (this.velocity.x > 0) this.direction = Direction.RIGHT;
+          else this.direction = Direction.LEFT;
+          this.velocity.normalize(true).scaleN(this.speed);
+        }
+        this.updateAnimation();
+      }
     }
-    this.updateAnimation();
     super.tick(deltaTime);
   }
 
@@ -84,6 +83,6 @@ export default class Player extends Entity<AnimatedImg, string> {
 
   public onCollide(entity: Entity, _hitbox: PhysicsBody, _entityHitbox: PhysicsBody, separationVector: Vector2): void {
     if (entity.name === 'collision') this.pos.move(separationVector);
-    else if ((entity.name = 'player')) this.pos.move(separationVector.scaleN(0.5));
+    else if (entity.name === 'player') this.pos.move(separationVector.scaleN(0.5));
   }
 }

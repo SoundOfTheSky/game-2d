@@ -19,16 +19,16 @@ export default class Rect implements IPhysicsBody {
 
   public collisonVector(f: Vector2) {
     if (f.y >= this.a.y && f.y <= this.b.y && f.x >= this.a.x && f.x <= this.b.x) {
-      const overlapX = f.x < this.a.x ? this.a.x - f.x + 1 : this.b.x - f.x + 1;
-      const overlapY = f.y < this.a.y ? this.a.y - f.y + 1 : this.b.y - f.y + 1;
+      const overlapX = f.x < this.a.x ? this.a.x - f.x : this.b.x - f.x;
+      const overlapY = f.y < this.a.y ? this.a.y - f.y : this.b.y - f.y;
       return Math.abs(overlapX) < Math.abs(overlapY) ? new Vector2(overlapX) : new Vector2(0, overlapY);
     }
   }
 
   public collisionRect(f: Rect) {
     if (f.a.x <= this.b.x && f.a.y <= this.b.y && f.b.x >= this.a.x && f.b.y >= this.a.y) {
-      const overlapX = f.a.x < this.a.x ? this.a.x - f.b.x + 1 : this.b.x - f.a.x + 1;
-      const overlapY = f.a.y < this.a.y ? this.a.y - f.b.y + 1 : this.b.y - f.a.y + 1;
+      const overlapX = f.a.x < this.a.x ? this.a.x - f.b.x : this.b.x - f.a.x;
+      const overlapY = f.a.y < this.a.y ? this.a.y - f.b.y : this.b.y - f.a.y;
       return Math.abs(overlapX) < Math.abs(overlapY) ? new Vector2(overlapX) : new Vector2(0, overlapY);
     }
   }

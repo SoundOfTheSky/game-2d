@@ -96,8 +96,8 @@ export default class Cam implements Tickable {
       ),
       time: 2000,
     };
-    if (this.followingEntity.velocity.x) animation.pos.x += this.followingEntity.velocity.x * this.scale * 1500;
-    if (this.followingEntity.velocity.y) animation.pos.y += this.followingEntity.velocity.y * this.scale * 1500;
+    // if (this.followingEntity.velocity.x) animation.pos.x += this.followingEntity.velocity.x * this.scale * 1500;
+    // if (this.followingEntity.velocity.y) animation.pos.y += this.followingEntity.velocity.y * this.scale * 1500;
     this.animate(animation);
     return true;
   }

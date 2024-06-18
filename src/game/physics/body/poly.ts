@@ -105,7 +105,7 @@ export default class Poly extends Array<Vector2> implements IPhysicsBody {
       const minB = midB - c.r;
       const maxB = midB + c.r;
       if (maxA <= minB || maxB <= minA) return;
-      const overlap = minB < minA ? minA - maxB - 1 : maxA - minB + 1;
+      const overlap = minB < minA ? minA - maxB : maxA - minB;
       if (Math.abs(overlap) < Math.abs(minOverlap)) {
         minOverlap = overlap;
         minAxis = axis;
