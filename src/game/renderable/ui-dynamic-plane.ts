@@ -23,12 +23,14 @@ export default class UIDynamicPlane implements Tickable {
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const tileSizeX = this.tileSize.x * this.scale;
     const tileSizeY = this.tileSize.y * this.scale;
+    // Size in tiles. If more than 5, make it odd to add custom decorations
     let w = ~~(this.rect.w / tileSizeX);
     let h = ~~(this.rect.h / tileSizeY);
     if (this.isLarge) {
       if (w > 5 && w % 2 === 0) w--;
       if (h > 5 && h % 2 === 0) h--;
     }
+    // Padding is for centering element in rect
     const paddingX = (this.rect.w % tileSizeX) / 2;
     const paddingY = (this.rect.h % tileSizeY) / 2;
     for (let y = 0; y < h; y++) {

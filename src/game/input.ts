@@ -9,29 +9,29 @@ export default class Input implements Tickable, Cleanuppable {
   public gamepads: Gamepad[] = [];
   public isGamepad = false;
   private mapping = {
-    w: 'up',
+    KeyW: 'up',
     ArrowUp: 'up',
     g12: 'up',
-    s: 'down',
+    KeyS: 'down',
     ArrowDown: 'down',
     g13: 'down',
-    d: 'right',
+    KeyD: 'right',
     ArrowRight: 'right',
     g15: 'right',
-    a: 'left',
+    KeyA: 'left',
     ArrowLeft: 'left',
     g14: 'left',
-    z: 'use',
-    e: 'use',
+    KeyE: 'use',
     Enter: 'use',
     g0: 'use',
     Escape: 'menu',
-    menu: 'menu',
     g9: 'menu',
     m0: 'main',
-    g4: 'main',
+    g5: 'main',
     m3: 'sub',
-    g5: 'sub',
+    g4: 'sub',
+    ShiftLeft: 'run',
+    g6: 'run',
   } as Record<string, string | undefined>;
   private pressedKeys = new Map<string, number>();
   private toRemove = new Set<string>();
@@ -137,7 +137,7 @@ export default class Input implements Tickable, Cleanuppable {
   }
 
   private onKeydown(e: KeyboardEvent) {
-    const id = this.mapping[e.key];
+    const id = this.mapping[e.code];
     if (!id) return;
     this.isGamepad = false;
     if (!this.pressedKeys.has(id)) this.pressedKeys.set(id, 0);
@@ -145,14 +145,14 @@ export default class Input implements Tickable, Cleanuppable {
   }
 
   private onKeyup(e: KeyboardEvent) {
-    const id = this.mapping[e.key];
+    const id = this.mapping[e.code];
     if (!id) return;
     this.toRemove.add(id);
   }
 
   private onMousemove(e: MouseEvent) {
-    this.look.x = (e.offsetX * window.devicePixelRatio) / this.game.canvas.width;
-    this.look.y = (e.offsetY * window.devicePixelRatio) / this.game.canvas.height;
+    this.look.x = 1 - ((e.offsetX * window.devicePixelRatio) / this.game.canvas.width) * 2;
+    this.look.y = 1 - ((e.offsetY * window.devicePixelRatio) / this.game.canvas.height) * 2;
   }
 
   private onMousedown(e: MouseEvent) {

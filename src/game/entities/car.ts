@@ -1,3 +1,5 @@
+import { random } from '@/utils';
+
 import Game from '../game';
 import { PhysicsBody } from '../physics/body';
 import Rect from '../physics/body/rect';
@@ -5,16 +7,27 @@ import Vector2 from '../physics/body/vector2';
 import Img from '../renderable/img';
 import { Ticker } from '../ticker';
 
+import DynamicEntity, { Direction } from './dynamic-entity';
 import Entity from './entity';
-import Player, { Direction } from './player';
+import Player from './player';
 
-export default class Car extends Entity<Img, string> {
-  public direction = Direction.DOWN;
-  public speed = 0.05;
-  public maxVelocity = 0.3;
-  public acceleration = new Vector2();
+let i = 0;
+
+export default class Car extends DynamicEntity<Img, string> {
+  public i = i++;
   public stopZones = new Set<Entity>();
-  protected inStopZone = false;
+  public skin = random(0, 5);
+  public accelerationSpeed = 0.001;
+  public decelerationSpeed = 0.013;
+  protected skinOffset = [
+    new Vector2(0, 0),
+    new Vector2(192, 0),
+    new Vector2(0, 64),
+    new Vector2(192, 64),
+    new Vector2(0, 128),
+    new Vector2(192, 128),
+  ];
+  protected stopZone?: Entity;
   protected pointI = 0;
   protected directionSettings = {
     [Direction.RIGHT]: {
@@ -53,6 +66,7 @@ export default class Car extends Entity<Img, string> {
     this.name = 'car';
     this.pos.x = path[0].x;
     this.pos.y = path[0].y;
+    this.updateAnimation();
   }
 
   public tick(deltaTime: number): void {
@@ -62,43 +76,42 @@ export default class Car extends Entity<Img, string> {
       this.pos.y = this.path[0].y;
       this.pointI = 0;
     }
-    if (this.inStopZone) {
-      this.inStopZone = false;
-      this.velocity.scaleN(0.92);
-    } else {
-      const acceleration = new Vector2(point.x - this.pos.x, point.y - this.pos.y).normalize().scaleN(0.001);
-      this.velocity.x += acceleration.x;
-      this.velocity.y += acceleration.y;
-      const d = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-      if (d > this.maxVelocity) {
-        this.velocity.x /= d / this.maxVelocity;
-        this.velocity.y /= d / this.maxVelocity;
+    if (this.stopZone) {
+      if (this.velocity.distance() <= this.decelerationSpeed) {
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+        this.acceleration.x = 0;
+        this.acceleration.y = 0;
+        if (this.stopZone instanceof Car ? !this.collideEntity(this.stopZone) : !this.stopZones.has(this.stopZone))
+          delete this.stopZone;
+      } else {
+        this.acceleration = this.velocity.clone().scaleN(-1).normalize(false, this.decelerationSpeed);
+        delete this.stopZone;
       }
-    }
-    if (Math.abs(this.velocity.y) > Math.abs(this.velocity.x)) {
-      if (this.velocity.y > 0) this.direction = Direction.DOWN;
-      else this.direction = Direction.UP;
-    } else if (this.velocity.x > 0) this.direction = Direction.RIGHT;
-    else this.direction = Direction.LEFT;
-    this.updateAnimation();
+    } else this.acceleration = point.clone().subtract(this.pos).normalize(false, this.accelerationSpeed);
     super.tick(deltaTime);
+    this.updateAnimation();
   }
 
   private updateAnimation() {
     const settings = this.directionSettings[this.direction];
-    this.img.offset = settings.offset;
+    const skinOffset = this.skinOffset[this.skin];
+    this.img.offset.x = settings.offset.x + skinOffset.x;
+    this.img.offset.y = settings.offset.y + skinOffset.y;
     this.img.size = settings.size;
-    this.hitboxes = [...settings.hitboxes];
+    this.hitboxes = settings.hitboxes;
     this.hitboxMeta.set(this.hitboxes[0], 'hitbox');
     this.hitboxMeta.set(this.hitboxes[1], 'stopZone');
   }
 
   public onCollide(entity: Entity, hitbox: PhysicsBody, entityHitbox: PhysicsBody, separationVector: Vector2): void {
     const meta = this.hitboxMeta.get(hitbox);
-    if (entity instanceof Player && meta === 'hitbox') {
-      this.inStopZone = true;
+    const entityMeta = entity.hitboxMeta.get(entityHitbox);
+    if (meta !== 'hitbox') return;
+    if (entity instanceof Car && entityMeta === 'hitbox') this.pos.move(separationVector.scaleN(0.5));
+    else if (entity instanceof Player) {
+      this.stopZone = entity;
       entity.pos.move(separationVector.scaleN(-1));
-    } else if (this.stopZones.has(entity) || (meta === 'hitbox' && entity.hitboxMeta.get(entityHitbox) === 'stopZone'))
-      this.inStopZone = true;
+    } else if (this.stopZones.has(entity) || (meta === 'hitbox' && entityMeta === 'stopZone')) this.stopZone = entity;
   }
 }

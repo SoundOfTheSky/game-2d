@@ -111,7 +111,7 @@ export default class Rect implements IPhysicsBody {
   }
 
   public equals(rect: Rect) {
-    return this.a === this.b || (this.a.equals(rect.a) && this.b.equals(rect.b));
+    return this.a.x === rect.a.x && this.a.y === rect.a.y && this.b.x === rect.b.x && this.b.y === rect.b.y;
   }
 
   public toString() {

@@ -1,5 +1,6 @@
 import Input from './input';
-import Rodosskaya from './levels/rodosskaya';
+import Map from './maps/map';
+import Rodosskaya from './maps/rodosskaya';
 import FPS from './renderable/fps';
 import { Ticker } from './ticker';
 import Utils from './utils';
@@ -53,9 +54,14 @@ const RESOURCE_URLS = [
   '/game/tilesets/25_Shooting_Range.png',
   '/game/tilesets/26_Condominium.png',
   '/game/tilesets/custom.png',
+  '/game/tilesets/Room_Builder_16x16.png',
   '/game/mc.png',
   '/game/portraits.png',
   '/game/maps/rodosskaya.json',
+  '/game/maps/pyatyorochka.json',
+  '/game/maps/wb.json',
+  '/game/maps/ozon.json',
+  '/game/maps/210.json',
 ];
 export default class Game extends Ticker {
   public ctx!: CanvasRenderingContext2D;
@@ -64,6 +70,8 @@ export default class Game extends Ticker {
   public utils;
   public time = 0;
   public resources: Record<string, HTMLImageElement | string> = {};
+  public map?: Map;
+  public fps = new FPS(this, this);
 
   public constructor(public canvas: HTMLCanvasElement) {
     super();
@@ -71,11 +79,10 @@ export default class Game extends Ticker {
     this.initCanvas();
 
     this.input = this.addTickable(new Input(this, this));
-    this.addTickable(new FPS(this, this));
     this.utils = new Utils(this);
 
     void this.preloadResources().then(() => {
-      this.addTickable(new Rodosskaya(this, this));
+      this.map = new Rodosskaya(this, this);
       this.tick(0);
     });
   }
@@ -91,32 +98,12 @@ export default class Game extends Ticker {
     this.time = time;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     super.tick(deltaTime);
+    this.map?.tick(deltaTime);
+    this.fps.tick();
     requestAnimationFrame((t) => this.tick(~~t));
     // setTimeout(() => {
     //   this.tick(performance.now());
     // }, 1000);
-  }
-
-  public static loadImage(url: string) {
-    return new Promise<HTMLImageElement>((r, j) => {
-      const img = document.createElement('img');
-      img.src = url;
-      img.onload = () => r(img);
-      img.onerror = j;
-    });
-  }
-
-  public static initCanvas(canvas: HTMLCanvasElement, w?: number, h?: number) {
-    const boundingBox = canvas.getBoundingClientRect();
-    canvas.width = w ?? boundingBox.width * window.devicePixelRatio;
-    canvas.height = h ?? boundingBox.height * window.devicePixelRatio;
-    const ctx = canvas.getContext('2d')!;
-    ctx.imageSmoothingEnabled = false;
-    ctx.font = `64px Minecraft`;
-    ctx.fillStyle = '#fff';
-    ctx.textBaseline = 'top';
-    ctx.textAlign = 'left';
-    return { boundingBox, ctx };
   }
 
   public cleanup(): void {
@@ -127,9 +114,22 @@ export default class Game extends Ticker {
   private async preloadResources() {
     const loaded = await Promise.all(
       RESOURCE_URLS.map((x) =>
-        x.endsWith('.png') || x.endsWith('.webp') ? Game.loadImage(x) : fetch(x).then((x) => x.text()),
+        x.endsWith('.png') || x.endsWith('.webp') ? this.utils.loadImage(x) : fetch(x).then((x) => x.text()),
       ),
     );
     for (let i = 0; i < loaded.length; i++) this.resources[RESOURCE_URLS[i]] = loaded[i];
+  }
+
+  public static initCanvas(canvas: HTMLCanvasElement, w?: number, h?: number) {
+    const boundingBox = canvas.getBoundingClientRect();
+    canvas.width = w ?? boundingBox.width * window.devicePixelRatio;
+    canvas.height = h ?? boundingBox.height * window.devicePixelRatio;
+    const ctx = canvas.getContext('2d')!;
+    ctx.imageSmoothingEnabled = false;
+    ctx.font = `${32 * window.devicePixelRatio}px Minecraft`;
+    ctx.fillStyle = '#fff';
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    return { boundingBox, ctx };
   }
 }

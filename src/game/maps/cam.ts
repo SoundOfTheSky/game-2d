@@ -1,7 +1,7 @@
-import Entity from './entities/entity';
-import Game from './game';
-import Vector2 from './physics/body/vector2';
-import { Tickable, Ticker } from './ticker';
+import Entity from '../entities/entity';
+import Game from '../game';
+import Vector2 from '../physics/body/vector2';
+import { Tickable, Ticker } from '../ticker';
 
 export type CamAnimation = {
   start: { pos: Vector2; scale: number; time: number };
@@ -27,7 +27,7 @@ export default class Cam implements Tickable {
     this._scale = value;
   }
   public entities: Entity[] = [];
-  public followingEntity?: Entity;
+  public followingEntities: Entity[] = [];
   private animation?: CamAnimation;
 
   public tick() {
@@ -36,6 +36,7 @@ export default class Cam implements Tickable {
     this.updateOutOfBounds();
     this.updateEntities();
   }
+
   public animate(animation: CamAnimation['delta']) {
     this.animation = {
       start: {
@@ -84,29 +85,32 @@ export default class Cam implements Tickable {
   }
 
   protected updateFollowingEntities() {
-    if (!this.followingEntity) return false;
+    if (!this.followingEntities.length) return false;
     const animation = {
-      pos: new Vector2(
-        this.followingEntity.pos.x * this.scale -
-          this.game.canvas.width / 2 +
-          (this.followingEntity.img!.size.x * this.scale) / 2,
-        this.followingEntity.pos.y * this.scale -
-          this.game.canvas.height / 2 +
-          (this.followingEntity.img!.size.y * this.scale) / 2,
-      ),
+      pos: new Vector2(),
       time: 2000,
     };
-    // if (this.followingEntity.velocity.x) animation.pos.x += this.followingEntity.velocity.x * this.scale * 1500;
-    // if (this.followingEntity.velocity.y) animation.pos.y += this.followingEntity.velocity.y * this.scale * 1500;
+    for (let i = 0; i < this.followingEntities.length; i++) {
+      const entity = this.followingEntities[i];
+      animation.pos.x += entity.pos.x * this.scale - this.game.canvas.width / 2;
+      animation.pos.y += entity.pos.y * this.scale - this.game.canvas.height / 2;
+      if (entity.img) {
+        animation.pos.x += (entity.img.size.x * this.scale) / 2;
+        animation.pos.y += (entity.img.size.y * this.scale) / 2;
+      }
+    }
+    animation.pos.x /= this.followingEntities.length;
+    animation.pos.y /= this.followingEntities.length;
     this.animate(animation);
     return true;
   }
 
   protected updateEntities() {
-    for (const entity of this.entities) {
+    for (let i = 0; i < this.entities.length; i++) {
+      const entity = this.entities[i];
       if (!entity.img) continue;
-      entity.img.pos.x = entity.pos.x * this.scale - this.pos.x;
-      entity.img.pos.y = entity.pos.y * this.scale - this.pos.y;
+      entity.img.pos.x = (entity.imageOffset.x + entity.pos.x) * this.scale - this.pos.x;
+      entity.img.pos.y = (entity.imageOffset.y + entity.pos.y) * this.scale - this.pos.y;
       entity.img.scale = entity.scale * this.scale;
     }
   }

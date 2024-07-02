@@ -1,16 +1,19 @@
-import Cam from './cam';
-import Entity from './entities/entity';
-import Game from './game';
-import Roads from './mechanics/roads';
-import Circle from './physics/body/circle';
-import Line from './physics/body/line';
-import Poly from './physics/body/poly';
-import Rect from './physics/body/rect';
-import Vector2 from './physics/body/vector2';
-import Physics from './physics/physics';
-import { Ticker } from './ticker';
+import Collision from '../entities/collision';
+import Entity from '../entities/entity';
+import Game from '../game';
+import Roads from '../mechanics/roads';
+import Circle from '../physics/body/circle';
+import Line from '../physics/body/line';
+import Poly from '../physics/body/poly';
+import Rect from '../physics/body/rect';
+import Vector2 from '../physics/body/vector2';
+import Physics from '../physics/physics';
+import { Ticker } from '../ticker';
+import triggers from '../triggers';
 
-export type TiledLevel = {
+import Cam from './cam';
+
+export type TiledMap = {
   width: number; // tiles
   height: number;
   tilewidth: number;
@@ -45,24 +48,26 @@ export type TyledObjectLayer = {
   }[];
 };
 
-export default class Level extends Ticker {
+export default class Map extends Ticker {
+  public name = 'default';
   public prerenderedLayers: HTMLCanvasElement[] = [];
   public cam;
   public physics;
-  public roads?: Roads;
 
   public constructor(
     protected game: Game,
     parent: Ticker,
-    public map: TiledLevel,
+    public map: TiledMap,
     priority = 100,
   ) {
     super(parent, priority);
     this.cam = new Cam(game, this);
     this.cam.max.x = this.map.width * this.map.tilewidth;
     this.cam.max.y = this.map.height * this.map.tileheight;
-    this.physics = new Physics([this.createCollisionEnity()], this, this.cam.max, 1);
+    this.physics = new Physics(this, this.cam.max, 1);
+    this.createCollisionEntity();
     this.createRoads();
+    this.createTriggerEntities();
     this.updateMap();
   }
 
@@ -75,13 +80,14 @@ export default class Level extends Ticker {
     const dx = this.game.canvas.width / this.cam.scale;
     const dy = this.game.canvas.height / this.cam.scale;
     for (let i = 0; i < this.prerenderedLayers.length; i++) {
-      if (i === 3)
+      const layer = this.prerenderedLayers[i];
+      this.game.ctx.drawImage(layer, x, y, dx, dy, 0, 0, this.game.canvas.width, this.game.canvas.height);
+      if (i === 2)
+        // 3 layers draw behind
         for (let i = 0; i < this.tickables.length; i++) {
           const item = this.tickables[i];
           if (item instanceof Entity) item.tick(deltaTime);
         }
-      const layer = this.prerenderedLayers[i];
-      this.game.ctx.drawImage(layer, x, y, dx, dy, 0, 0, this.game.canvas.width, this.game.canvas.height);
     }
     for (let i = 0; i < this.tickables.length; i++) {
       const item = this.tickables[i];
@@ -134,16 +140,29 @@ export default class Level extends Ticker {
     }
   }
 
-  protected createCollisionEnity() {
-    const collision = new Entity<undefined, undefined>(this.game, this, undefined);
-    collision.name = 'collision';
+  protected createTriggerEntities() {
+    const layer = this.map.layers.find((l) => l.name === 'triggers') as TyledObjectLayer;
+    if (!layer) return;
+    for (let i = 0; i < layer.objects.length; i++) {
+      const object = layer.objects[i];
+      const name = object.name.split('_')[0] as keyof typeof triggers;
+      if (name in triggers) {
+        const entity = new triggers[name](this.game, this, object.name);
+        entity.hitboxes.push(this.mapObjectToPhysicsBody(object));
+        this.addEntity(entity);
+      }
+    }
+  }
+
+  protected createCollisionEntity() {
+    const entity = new Collision(this.game, this, undefined);
     const layer = this.map.layers.find((l) => l.name === 'collision') as TyledObjectLayer;
-    for (const obj of layer.objects) collision.hitboxes.push(this.mapObjectToPhysicsBody(obj));
-    collision.hitboxes.push(new Line(new Vector2(), new Vector2(this.cam.max.x)));
-    collision.hitboxes.push(new Line(new Vector2(), new Vector2(0, this.cam.max.y)));
-    collision.hitboxes.push(new Line(new Vector2(this.cam.max.x), this.cam.max));
-    collision.hitboxes.push(new Line(new Vector2(0, this.cam.max.y), this.cam.max));
-    return collision;
+    entity.hitboxes = layer.objects.map((obj) => this.mapObjectToPhysicsBody(obj));
+    entity.hitboxes.push(new Line(new Vector2(), new Vector2(this.cam.max.x)));
+    entity.hitboxes.push(new Line(new Vector2(), new Vector2(0, this.cam.max.y)));
+    entity.hitboxes.push(new Line(new Vector2(this.cam.max.x), this.cam.max));
+    entity.hitboxes.push(new Line(new Vector2(0, this.cam.max.y), this.cam.max));
+    this.physics.addEntity(entity);
   }
 
   protected mapObjectToPhysicsBody(obj: TyledObjectLayer['objects'][0]) {
@@ -157,7 +176,7 @@ export default class Level extends Ticker {
   protected createRoads() {
     const carsLayer = this.map.layers.find((x) => x.name === 'roads') as TyledObjectLayer;
     if (!carsLayer) return;
-    this.roads = this.addTickable(
+    this.addTickable(
       new Roads(
         this.game,
         this,

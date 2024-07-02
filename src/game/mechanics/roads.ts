@@ -3,7 +3,7 @@ import { random } from '@/utils';
 import Car from '../entities/car';
 import Entity from '../entities/entity';
 import Game from '../game';
-import Level from '../level';
+import Map from '../maps/map';
 import Vector2 from '../physics/body/vector2';
 import { Tickable } from '../ticker';
 
@@ -18,7 +18,7 @@ export default class Roads implements Tickable {
 
   public constructor(
     public game: Game,
-    public level: Level,
+    public map: Map,
     public paths: {
       name: string;
       path: Vector2[];
@@ -48,17 +48,17 @@ export default class Roads implements Tickable {
       const timeDelta = this.game.time - (path.nextSpawnTime ?? 0);
       if (timeDelta >= 0) {
         path.nextSpawnTime = this.game.time + random(path.minSpawnTime ?? 2000, path.maxSpawnTime ?? 12000);
-        const car = new Car(this.game, this.level, path.path, this.priority);
+        const car = new Car(this.game, this.map, path.path, this.priority);
         car.name = path.name;
         car.stopZones = path.stopZones;
-        this.level.addEntity(car);
+        this.map.addEntity(car);
         path.cars.push(car);
       }
       const lastPoint = path.path.at(-1)!;
       for (let i = 0; i < path.cars.length; i++) {
         const car = path.cars[i];
         if (lastPoint.distance(car.pos) <= 48) {
-          this.level.removeEntity(car);
+          this.map.removeEntity(car);
           path.cars.splice(i--, 1);
         }
       }
@@ -103,10 +103,10 @@ export default class Roads implements Tickable {
           offset.y,
           16,
           32,
-          light.x * this.level.cam.scale - this.level.cam.pos.x,
-          light.y * this.level.cam.scale - this.level.cam.pos.y,
-          16 * this.level.cam.scale,
-          32 * this.level.cam.scale,
+          light.x * this.map.cam.scale - this.map.cam.pos.x,
+          light.y * this.map.cam.scale - this.map.cam.pos.y,
+          16 * this.map.cam.scale,
+          32 * this.map.cam.scale,
         );
       }
     }

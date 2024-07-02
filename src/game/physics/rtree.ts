@@ -177,16 +177,16 @@ export default class RTree {
   }
 
   public remove(rect: Rect) {
-    const stack = [...this.children];
+    const stack: RTree[] = [this];
     while (stack.length) {
       const node = stack.pop()!;
       if (node.leaf) {
-        const index = node.children.findIndex((c) => c.rect.equals(rect));
-        if (index !== -1) {
-          node.children.splice(index, 1)[0];
-          node.condense();
-          return this;
-        }
+        for (let i = 0; i < node.children.length; i++)
+          if (node.children[i].rect.equals(rect)) {
+            node.children.splice(i, 1);
+            node.condense();
+            return this;
+          }
       } else for (let i = 0; i < node.children.length; i++) stack.push(node.children[i]);
     }
     return this;

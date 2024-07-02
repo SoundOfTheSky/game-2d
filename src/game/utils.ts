@@ -48,4 +48,13 @@ export default class Utils {
   public yn(p: number) {
     return this.game.canvas.height - this.game.canvas.height * p;
   }
+
+  public loadImage(url: string) {
+    return new Promise<HTMLImageElement>((r, j) => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.onload = () => r(img);
+      img.onerror = j;
+    });
+  }
 }

@@ -41,26 +41,3 @@ export class Ticker implements Tickable {
     this.tickables.sort((a, b) => a.priority - b.priority);
   }
 }
-/**
- * Priority:
- * 0 - Default
- * 1 - bg
- * 2 - bg decor
- * 3 - player if behind
- * 4 - stuff plane
- * 5 - stuff plane decor
- * 6 - player if in front
- * 7 - fg
- * 8 - fg decor
- * 9-19 - idk just in case
- * 0 - 20 - Image rendering
- * 31 - HUD bg
- * 32 - HUD fg
- * 33 - Pause HUD bg
- * 34 - Pause hud fg
- *
- * 100 - Level (Above images)
- * 101 - Player (Above level)
- *
- * 10000 - Input
- */

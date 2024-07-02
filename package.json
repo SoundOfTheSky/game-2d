@@ -4,7 +4,8 @@
     "start": "vite --host --port 64002",
     "build": "vite build",
     "serve": "vite preview --port 64002",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix && tsc"
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix && tsc",
+    "update-assets": "rm -rf ./public/game && cp -rv /Users/soundofthesky/Yandex.Disk.localized/GameAssets/game ./public/game"
   },
   "dependencies": {
   },

@@ -18,8 +18,9 @@ export default class Vector2 implements IPhysicsBody {
     return new Vector2(this.x, this.y);
   }
 
-  public distance(v: Vector2) {
-    return Math.sqrt((this.x - v.x) ** 2 + (this.y - v.y) ** 2);
+  public distance(v?: Vector2) {
+    if (v) return Math.sqrt((this.x - v.x) ** 2 + (this.y - v.y) ** 2);
+    return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
   public collision(f: PhysicsBody): Vector2 | undefined {
@@ -52,11 +53,11 @@ export default class Vector2 implements IPhysicsBody {
     return this;
   }
 
-  public normalize(onlyDecrease?: boolean): Vector2 {
-    const d = Math.sqrt(this.x * this.x + this.y * this.y);
-    if (onlyDecrease ? d > 1 : d !== 0) {
-      this.x /= d;
-      this.y /= d;
+  public normalize(onlyDecrease?: boolean, maxDistance = 1): Vector2 {
+    const d = this.distance();
+    if (onlyDecrease ? d > maxDistance : d !== 0) {
+      this.x /= d / maxDistance;
+      this.y /= d / maxDistance;
     }
     return this;
   }
