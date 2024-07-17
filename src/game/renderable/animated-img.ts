@@ -70,15 +70,15 @@ export default class AnimatedImg extends Img {
     infinite?: boolean,
   ) {
     const frames: Partial<AnimationFrame>[] = [];
-    for (let i = from; i <= to; i++) {
+    for (let i = from - 1; i < to; i++) {
       const frame: Partial<AnimationFrame> = {
         offset: new Vector2(size.x * i, 0),
       };
-      if (i === from) {
+      if (i === from - 1) {
         frame.source = s;
         frame.size = size;
       }
-      if (i !== to || infinite) frame.time = interval;
+      if (i !== to - 1 || infinite) frame.time = interval;
       frames.push(frame);
     }
     return frames;

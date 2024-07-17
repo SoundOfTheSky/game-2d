@@ -17,26 +17,25 @@ export default class Player extends DynamicEntity<AnimatedImg, string> {
 
   public constructor(game: Game, parent: Ticker, priority?: number) {
     const source = game.resources['/game/mc.png'] as HTMLImageElement;
-    const genAnimation = (from: number, to: number) =>
-      AnimatedImg.generateAnimation(source, new Vector2(16, 32), from, to, 120, true);
+    const genAnimation = (from: number, to: number, time = 120, infinite = true) =>
+      AnimatedImg.generateAnimation(source, new Vector2(32, 32), from, to, time, infinite);
     super(
       game,
       parent,
       new AnimatedImg(game, game, {
-        walkUp: genAnimation(0, 5),
-        walkDown: genAnimation(6, 11),
-        walkRight: genAnimation(12, 17),
-        walkLeft: genAnimation(18, 23),
-        runUp: genAnimation(0, 5),
-        runDown: genAnimation(6, 11),
-        runRight: genAnimation(6, 11),
-        runLeft: genAnimation(6, 11),
-        idleUp: genAnimation(6, 11),
-        idleDown: genAnimation(6, 11),
-        idleRight: genAnimation(6, 11),
-        idleLeft: genAnimation(6, 11),
-        fall: genAnimation(6, 11),
-        emoteJump: genAnimation(6, 11),
+        walkUp: genAnimation(1, 6),
+        walkDown: genAnimation(7, 12),
+        walkRight: genAnimation(13, 18),
+        walkLeft: genAnimation(19, 24),
+        idleUp: genAnimation(25, 29),
+        idleDown: genAnimation(30, 34),
+        idleRight: genAnimation(35, 39),
+        idleLeft: genAnimation(40, 44),
+        runUp: genAnimation(45, 50, 90),
+        runDown: genAnimation(51, 56, 90),
+        runRight: genAnimation(57, 62),
+        runLeft: genAnimation(63, 68),
+        emoteJump: genAnimation(69, 74, 120, false),
       }),
       priority,
     );
@@ -44,7 +43,7 @@ export default class Player extends DynamicEntity<AnimatedImg, string> {
     this.img.animations.idleDown[0].time = 1200;
     this.img.animations.idleRight[0].time = 1200;
     this.img.animations.idleLeft[0].time = 1200;
-    this.hitboxes.push(new Circle(new Vector2(8, 24), 8));
+    this.hitboxes.push(new Circle(new Vector2(16, 24), 8));
     this.name = 'player';
   }
 
