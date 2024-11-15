@@ -1,6 +1,6 @@
-import Rect from './rect';
+import Rect from './rect'
 
-import { IPhysicsBody, PhysicsBody } from '.';
+import { IPhysicsBody, PhysicsBody } from '.'
 
 export default class Vector2 implements IPhysicsBody {
   public constructor(
@@ -8,61 +8,85 @@ export default class Vector2 implements IPhysicsBody {
     public y = 0,
   ) {}
 
-  public move(v: Vector2) {
-    this.x += v.x;
-    this.y += v.y;
-    return this;
+  public add(v: Vector2 | number) {
+    if (v instanceof Vector2) {
+      this.x += v.x
+      this.y += v.y
+    }
+    else {
+      this.x += v
+      this.y += v
+    }
+    return this
+  }
+
+  public subtract(v: Vector2 | number) {
+    if (v instanceof Vector2) {
+      this.x -= v.x
+      this.y -= v.y
+    }
+    else {
+      this.x -= v
+      this.y -= v
+    }
+    return this
+  }
+
+  public multiply(v: Vector2 | number) {
+    if (v instanceof Vector2) {
+      this.x *= v.x
+      this.y *= v.y
+    }
+    else {
+      this.x *= v
+      this.y *= v
+    }
+    return this
+  }
+
+  public devide(v: Vector2 | number) {
+    if (v instanceof Vector2) {
+      this.x /= v.x
+      this.y /= v.y
+    }
+    else {
+      this.x /= v
+      this.y /= v
+    }
+    return this
   }
 
   public clone() {
-    return new Vector2(this.x, this.y);
+    return new Vector2(this.x, this.y)
   }
 
   public distance(v?: Vector2) {
-    if (v) return Math.sqrt((this.x - v.x) ** 2 + (this.y - v.y) ** 2);
-    return Math.sqrt(this.x * this.x + this.y * this.y);
+    if (v) return Math.hypot((this.x - v.x), (this.y - v.y))
+    return Math.hypot(this.x, this.y)
   }
 
   public collision(f: PhysicsBody): Vector2 | undefined {
     if (f instanceof Vector2) {
-      if (f.x === this.x && f.y === this.y) new Vector2(this.x + 1, this.y);
-      return;
+      if (f.x === this.x && f.y === this.y) new Vector2(this.x + 1, this.y)
+      return
     }
-    return f.collision(this)?.scaleN(-1);
+    return f.collision(this)?.multiply(-1)
   }
 
   public toRect(): Rect {
-    return new Rect(this.clone(), this.clone());
+    return new Rect(this.clone(), this.clone())
   }
 
-  public subtract(v: Vector2) {
-    this.x -= v.x;
-    this.y -= v.y;
-    return this;
-  }
-
-  public scale(v: Vector2) {
-    this.x *= v.x;
-    this.y *= v.y;
-    return this;
-  }
-
-  public scaleN(n: number) {
-    this.x *= n;
-    this.y *= n;
-    return this;
-  }
-
-  public normalize(onlyDecrease?: boolean, maxDistance = 1): Vector2 {
-    const d = this.distance();
+  public normalize(onlyDecrease?: boolean, maxDistance = 1): this {
+    const d = this.distance()
     if (onlyDecrease ? d > maxDistance : d !== 0) {
-      this.x /= d / maxDistance;
-      this.y /= d / maxDistance;
+      this.x /= d / maxDistance
+      this.y /= d / maxDistance
     }
-    return this;
+    return this
   }
 
   public equals(v: Vector2) {
-    return this.x === v.x && this.y === v.y;
+    return this.x === v.x && this.y === v.y
   }
 }

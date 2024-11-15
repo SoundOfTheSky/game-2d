@@ -3,4 +3,5 @@ dist
 dev-dist
 .env
 .DS_Store
+tsconfig.tsbuildinfo
 public/game

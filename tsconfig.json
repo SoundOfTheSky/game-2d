@@ -1,22 +1,6 @@
 {
+  "extends": "@softsky/configs/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "src",
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
     "types": ["vite/client"],
-    "noEmit": true,
-    "isolatedModules": true,
-    "strict": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "skipLibCheck": true,
-    "paths": {
-      "@/*": ["./*"]
-    },
-  },
-  "include": ["src/**/*"]
+  }
 }

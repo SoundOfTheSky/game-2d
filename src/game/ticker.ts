@@ -1,12 +1,12 @@
 export type Tickable = {
-  parent?: Ticker;
-  tick(deltaTime: number): void;
-  priority: number;
-} & Partial<Cleanuppable>;
+  parent?: Ticker
+  tick(deltaTime: number): void
+  priority: number
+} & Partial<Cleanuppable>
 
 export type Cleanuppable = {
-  cleanup(): void;
-};
+  cleanup(): void
+}
 
 export class Ticker implements Tickable {
   public constructor(
@@ -14,30 +14,30 @@ export class Ticker implements Tickable {
     public priority = 0,
   ) {}
 
-  public tickables: Tickable[] = [];
+  public tickables: Tickable[] = []
 
   public cleanup(): void {
-    for (let i = 0; i < this.tickables.length; i++) this.tickables[i].cleanup?.();
+    for (let index = 0; index < this.tickables.length; index++) this.tickables[index]!.cleanup?.()
   }
 
   public tick(deltaTime: number) {
-    for (let i = 0; i < this.tickables.length; i++) this.tickables[i].tick(deltaTime);
+    for (let index = 0; index < this.tickables.length; index++) this.tickables[index]!.tick(deltaTime)
   }
 
   public addTickable<T extends Tickable>(tickable: T): T {
-    tickable.parent = this;
-    let i = this.tickables.findIndex((x) => x.priority < tickable.priority);
-    if (i === -1) i = this.tickables.length;
-    this.tickables.splice(i, 0, tickable);
-    return tickable;
+    tickable.parent = this
+    let index = this.tickables.findIndex(x => x.priority < tickable.priority)
+    if (index === -1) index = this.tickables.length
+    this.tickables.splice(index, 0, tickable)
+    return tickable
   }
 
   public removeTickable(tickable: Tickable) {
-    const i = this.tickables.indexOf(tickable);
-    if (i !== -1) this.tickables.splice(i, 1);
+    const index = this.tickables.indexOf(tickable)
+    if (index !== -1) this.tickables.splice(index, 1)
   }
 
   public sortTickables() {
-    this.tickables.sort((a, b) => a.priority - b.priority);
+    this.tickables.sort((a, b) => a.priority - b.priority)
   }
 }

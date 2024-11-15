@@ -1,14 +1,14 @@
-import './fonts.scss';
-import Game from './game/game';
-import './global.scss';
+import './fonts.scss'
+import Game from './game/game'
+import './global.scss'
 
-new Game(document.querySelector('canvas')!);
+new Game(document.querySelector('canvas')!)
 
 declare global {
-  function setTimeout<TArgs extends unknown[]>(callback: (...args: TArgs) => void, ms?: number, ...args: TArgs): number;
-  function setInterval<TArgs extends unknown[]>(
-    callback: (...args: TArgs) => void,
+  function setTimeout<TArguments extends unknown[]>(callback: (...arguments_: TArguments) => void, ms?: number, ...arguments_: TArguments): number
+  function setInterval<TArguments extends unknown[]>(
+    callback: (...arguments_: TArguments) => void,
     ms?: number,
-    ...args: TArgs
-  ): number;
+    ...arguments_: TArguments
+  ): number
 }
