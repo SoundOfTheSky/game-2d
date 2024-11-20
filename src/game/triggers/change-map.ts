@@ -6,13 +6,12 @@ import { PhysicsBody } from '../physics/body'
 import Vector2 from '../physics/body/vector2'
 import AnimatedImg from '../renderable/animated-img'
 import Img from '../renderable/img'
-import { Ticker } from '../ticker'
 
 const maps = import.meta.glob<true, string, () => Promise<{ default: typeof Rodosskaya }>>('../maps/*.ts')
 
 export default class ChangeMap extends Entity<undefined, undefined> {
-  public constructor(game: Game, parent: Ticker, name: string) {
-    super(game, parent)
+  public constructor(game: Game, name: string, priority?: number) {
+    super(game, undefined, priority)
     this.name = name
   }
 
@@ -28,7 +27,7 @@ export default class ChangeMap extends Entity<undefined, undefined> {
       name[1] = this.game.map!.name
       if (path in maps)
         void maps[path]!().then((map) => {
-          this.game.map = new map.default(this.game, this.game, name.join('_'))
+          this.game.map = new map.default(this.game, name.join('_'))
         })
       else throw new Error('Unknown level')
     }

@@ -1,13 +1,11 @@
 import Player from '../entities/player'
 import Game from '../game'
-import { Ticker } from '../ticker'
 
 import Map, { TiledMap, TyledObjectLayer } from './map'
 
 export default class SimpleMap extends Map {
   public constructor(
     game: Game,
-    parent: Ticker,
     public name: string,
     playerSpawnName = 'spawn',
     priority?: number,
@@ -19,8 +17,8 @@ export default class SimpleMap extends Map {
       return tileset
     })
 
-    super(game, parent, map, priority)
-    const p = new Player(game, this, 14)
+    super(game, map, priority)
+    const p = new Player(game, 14)
     const spawn = (this.map.layers.find(layer => layer.name === 'triggers') as TyledObjectLayer).objects.find(
       object => object.name === playerSpawnName,
     )

@@ -1,21 +1,13 @@
-import DynamicEntity from '../entities/dynamic-entity'
 import Entity from '../entities/entity'
-import Game from '../game'
 import Vector2 from '../physics/body/vector2'
-import { Tickable, Ticker } from '../ticker'
+import { Tickable } from '../ticker'
 
 export type CamAnimation = {
   start: { pos: Vector2, scale: number, time: number }
   delta: { pos?: Vector2, scale?: number, time: number }
 }
 export const easing = (t: number) => 1 - Math.pow(1 - t, 3)
-export default class Cam implements Tickable {
-  public constructor(
-    protected game: Game,
-    public parent: Ticker,
-    public priority = 0,
-  ) {}
-
+export default class Cam extends Tickable {
   public pos = new Vector2()
   public max = new Vector2(Infinity, Infinity)
   private _scale = 1
@@ -33,11 +25,12 @@ export default class Cam implements Tickable {
   public followingEntities: Entity[] = []
   private animation?: CamAnimation
 
-  public tick() {
+  public tick(deltaTime: number) {
     this.updateAnimation()
     this.updateFollowingEntities()
     this.updateOutOfBounds()
     this.updateEntities()
+    super.tick(deltaTime)
   }
 
   public animate(animation: CamAnimation['delta']) {
@@ -91,7 +84,7 @@ export default class Cam implements Tickable {
     if (this.followingEntities.length === 0) return false
     const animation = {
       pos: new Vector2(),
-      time: 1000,
+      time: 600,
     }
     for (let index = 0; index < this.followingEntities.length; index++) {
       const entity = this.followingEntities[index]!
@@ -101,11 +94,11 @@ export default class Cam implements Tickable {
         animation.pos.x += (entity.img.size.x * this.scale) / 2
         animation.pos.y += (entity.img.size.y * this.scale) / 2
       }
-      if (entity instanceof DynamicEntity && (entity.velocity.x !== 0 || entity.velocity.y !== 0)) {
-        const mult = this.scale * 1000
-        animation.pos.x += entity.velocity.x * mult
-        animation.pos.y += entity.velocity.y * mult
-      }
+      // if (entity instanceof DynamicEntity && (entity.velocity.x !== 0 || entity.velocity.y !== 0)) {
+      //   const mult = this.scale * 1000
+      //   animation.pos.x += entity.velocity.x * mult
+      //   animation.pos.y += entity.velocity.y * mult
+      // }
     }
     animation.pos.x /= this.followingEntities.length
     animation.pos.y /= this.followingEntities.length

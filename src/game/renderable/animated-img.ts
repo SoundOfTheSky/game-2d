@@ -1,6 +1,5 @@
 import Game from '../game'
 import Vector2 from '../physics/body/vector2'
-import { Ticker } from '../ticker'
 
 import Img from './img'
 
@@ -22,13 +21,12 @@ export default class AnimatedImg extends Img {
 
   public constructor(
     game: Game,
-    parent: Ticker,
     public animations: Record<string, Partial<AnimationFrame>[]>,
     priority?: number,
   ) {
     const k = Object.keys(animations)[0]!
     const v = animations[k]![0]!
-    super(game, parent, v.source!, v.pos, v.size, v.offset, v.scale, priority)
+    super(game, v.source!, v.pos, v.size, v.offset, v.scale, priority)
     this.lastFrameChange = this.game.time
     this.animation = k
   }
@@ -40,7 +38,7 @@ export default class AnimatedImg extends Img {
     Object.assign(this, this.animations[name]![0])
   }
 
-  public tick(): void {
+  public tick(deltaTime: number): void {
     let timeSinceLastChange = this.game.time - this.lastFrameChange
     const animation = this.animations[this.animation]!
     let changed = false
@@ -58,7 +56,7 @@ export default class AnimatedImg extends Img {
       this.lastFrameChange = this.game.time - (frame.time ?? 0) / this.speed - timeSinceLastChange
       Object.assign(this, frame)
     }
-    super.tick()
+    super.tick(deltaTime)
   }
 
   public static generateAnimation(

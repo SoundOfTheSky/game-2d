@@ -55,24 +55,24 @@ export default class Map extends Ticker {
   public physics
 
   public constructor(
-    protected game: Game,
-    parent: Ticker,
+    game: Game,
     public map: TiledMap,
     priority = 100,
   ) {
-    super(parent, priority)
-    this.cam = new Cam(game, this)
+    super(game, priority)
+    this.cam = new Cam(game)
     this.cam.max.x = this.map.width * this.map.tilewidth
     this.cam.max.y = this.map.height * this.map.tileheight
-    this.physics = new Physics(this, this.cam.max, 1)
+    this.physics = new Physics(this.game, this.cam.max, 1)
     this.createCollisionEntity()
     this.createRoads()
     this.createTriggerEntities()
     this.updateMap()
   }
 
+  /** Don't calls super */
   public tick(deltaTime: number): void {
-    this.cam.tick()
+    this.cam.tick(deltaTime)
     this.physics.tick(deltaTime)
     this.tickables.sort(
       (a, b) =>
@@ -163,7 +163,7 @@ export default class Map extends Ticker {
       const object = layer.objects[index]!
       const name = object.name.split('_')[0] as keyof typeof triggers
       if (name in triggers) {
-        const entity = new triggers[name](this.game, this, object.name)
+        const entity = new triggers[name](this.game, object.name)
         entity.hitboxes.push(this.mapObjectToPhysicsBody(object))
         this.addEntity(entity)
       }
@@ -171,7 +171,7 @@ export default class Map extends Ticker {
   }
 
   protected createCollisionEntity() {
-    const entity = new Collision(this.game, this, undefined)
+    const entity = new Collision(this.game, undefined)
     const layer = this.map.layers.find(
       l => l.name === 'collision',
     ) as TyledObjectLayer
@@ -216,7 +216,6 @@ export default class Map extends Ticker {
     this.addTickable(
       new Roads(
         this.game,
-        this,
         carsLayer.objects
           .filter(x => !x.name.includes('_'))
           .map(path => ({
@@ -236,7 +235,7 @@ export default class Map extends Ticker {
               string,
               string,
             ]
-            const entity = new Entity(this.game, this, undefined)
+            const entity = new Entity(this.game, undefined)
             entity.hitboxes.push(this.mapObjectToPhysicsBody(x))
             entity.name = names
             this.addEntity(entity)

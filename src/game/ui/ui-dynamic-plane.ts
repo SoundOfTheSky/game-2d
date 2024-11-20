@@ -1,21 +1,21 @@
 import Game from '../game'
 import Rect from '../physics/body/rect'
 import Vector2 from '../physics/body/vector2'
-import { Tickable, Ticker } from '../ticker'
+import { Tickable } from '../ticker'
 
-export default class UIDynamicPlane implements Tickable {
+export default class UIDynamicPlane extends Tickable {
   public canvas = document.createElement('canvas')
   public constructor(
-    public game: Game,
-    public parent: Ticker,
+    game: Game,
     public source: HTMLImageElement,
     public sourcePos: Vector2,
     public tileSize: Vector2,
     public rect: Rect,
     public scale = 1,
     public isLarge = false,
-    public priority = 100,
+    priority = 100,
   ) {
+    super(game, priority)
     this.updateImage()
   }
 
@@ -65,8 +65,8 @@ export default class UIDynamicPlane implements Tickable {
         )
   }
 
-  public tick() {
+  public tick(deltaTime: number) {
     this.game.ctx.drawImage(this.canvas, this.rect.a.x, this.rect.a.y)
-    // this.game.ctx.strokeRect(this.rect.a.x, this.rect.a.y, this.rect.w, this.rect.h);
+    super.tick(deltaTime)
   }
 }

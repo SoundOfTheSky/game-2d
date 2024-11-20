@@ -35,12 +35,11 @@ export default class Dialogue extends Ticker {
   private portraitScale!: number
 
   public constructor(
-    public game: Game,
-    parent: Ticker,
+    game: Game,
     item: DialogueItem,
-    priority = 0,
+    priority?: number,
   ) {
-    super(parent, priority)
+    super(game, priority)
     this.queue.push(item)
     this.updateUIs()
   }
@@ -55,7 +54,6 @@ export default class Dialogue extends Ticker {
     this.fontSpacing = 2 * scale
     this.bgUI = new BGBig(
       this.game,
-      this,
       new Rect(
         // 3.5 so UI has some padding
         new Vector2(0, this.game.canvas.height - ~~Math.min(bgTileScaled * 3.5, this.game.canvas.height / 3)),
@@ -74,7 +72,6 @@ export default class Dialogue extends Ticker {
     this.portraitScale = portraitSize / 64
     this.nameUI = new BG(
       this.game,
-      this,
       new Rect(
         new Vector2(
           this.bgUI.rect.a.x + padding.x + this.bgUI.borderScaled * 2,
@@ -120,8 +117,8 @@ export default class Dialogue extends Ticker {
       this.lastLetterTime = this.game.time - timeSinceLastChange
     }
     super.tick(deltaTime)
-    this.bgUI.tick()
-    this.nameUI.tick()
+    this.bgUI.tick(deltaTime)
+    this.nameUI.tick(deltaTime)
     this.game.utils.text(this.text, this.textPos, {
       fitWidth: this.game.canvas.width - this.textPos.x * 2,
       size: this.fontSize,
@@ -131,7 +128,7 @@ export default class Dialogue extends Ticker {
     if (item.portrait) {
       item.portrait.pos = this.portraitPos
       item.portrait.scale = this.portraitScale
-      item.portrait.tick()
+      item.portrait.tick(deltaTime)
     }
     if (item.next?.({ item, textI: this.textI, timeSinceLastChange })) {
       this.queueI++

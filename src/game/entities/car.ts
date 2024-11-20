@@ -5,7 +5,6 @@ import { PhysicsBody } from '../physics/body'
 import Rect from '../physics/body/rect'
 import Vector2 from '../physics/body/vector2'
 import Img from '../renderable/img'
-import { Ticker } from '../ticker'
 
 import DynamicEntity, { Direction } from './dynamic-entity'
 import Entity from './entity'
@@ -55,12 +54,11 @@ export default class Car extends DynamicEntity<Img, string> {
 
   public constructor(
     game: Game,
-    parent: Ticker,
     public path: Vector2[],
     priority?: number,
   ) {
     const source = game.resources['/game/tilesets/10_Vehicles_16x16.png'] as HTMLImageElement
-    super(game, parent, new Img(game, game, source), priority)
+    super(game, new Img(game, source), priority)
     this.name = 'car'
     this.pos.x = path[0]!.x
     this.pos.y = path[0]!.y

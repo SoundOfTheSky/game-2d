@@ -1,13 +1,15 @@
+import Game from 'game/game'
+
 import DynamicEntity from '../entities/dynamic-entity'
 import Entity from '../entities/entity'
-import { Tickable, Ticker } from '../ticker'
+import { Tickable } from '../ticker'
 
 import { PhysicsBody } from './body'
 import Rect from './body/rect'
 import Vector2 from './body/vector2'
 import RTree from './rtree'
 
-export default class Physics implements Tickable {
+export default class Physics extends Tickable {
   private entities: Entity[] = []
   private staticRTree = new RTree()
   private rtree = new RTree()
@@ -17,10 +19,12 @@ export default class Physics implements Tickable {
   private entityBodies = new WeakMap<Entity, PhysicsBody[]>()
 
   public constructor(
-    public parent: Ticker,
+    game: Game,
     public size = new Vector2(),
-    public priority = 0,
-  ) {}
+    priority?: number,
+  ) {
+    super(game, priority)
+  }
 
   public addEntity(entity: Entity) {
     this.entities.push(entity)

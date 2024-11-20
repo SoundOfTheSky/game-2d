@@ -1,25 +1,26 @@
 import Game from '../game'
 import Vector2 from '../physics/body/vector2'
-import { Tickable, Ticker } from '../ticker'
+import { Tickable } from '../ticker'
 
-export default class Img implements Tickable {
+export default class Img extends Tickable {
   public show = true
 
   public constructor(
-    protected game: Game,
-    public parent: Ticker,
+    game: Game,
     public source: HTMLImageElement,
     public pos = new Vector2(),
     public size = new Vector2(),
     public offset = new Vector2(),
     public scale = 1,
-    public priority = 0,
+    priority?: number,
   ) {
+    super(game, priority)
     if (this.size.x === 0) this.size.x = this.source.naturalWidth
     if (this.size.y === 0) this.size.y = this.source.naturalHeight
   }
 
-  public tick(): void {
+  public tick(deltaTime: number): void {
+    super.tick(deltaTime)
     if (!this.show) return
     this.game.ctx.drawImage(
       this.source,

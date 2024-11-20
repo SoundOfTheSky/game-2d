@@ -24,12 +24,11 @@ export default class Entity<IMG extends EntityImage = EntityImage, Meta = unknow
   }
 
   public constructor(
-    public game: Game,
-    parent: Ticker,
+    game: Game,
     img?: IMG,
     priority?: number,
   ) {
-    super(parent, priority)
+    super(game, priority)
     if (img) this.img = img
   }
 
