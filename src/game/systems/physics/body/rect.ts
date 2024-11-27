@@ -10,6 +10,46 @@ export default class Rect implements IPhysicsBody {
     public b = new Vector2(),
   ) {}
 
+  public scale(v: Vector2 | number) {
+    const center = this.center()
+    const scaleX = typeof v === 'number' ? v : v.x
+    const scaleY = typeof v === 'number' ? v : v.y
+    this.a.x = center.x + (this.a.x - center.x) * scaleX
+    this.a.y = center.y + (this.a.y - center.y) * scaleY
+    this.b.x = center.x + (this.b.x - center.x) * scaleX
+    this.b.y = center.y + (this.b.y - center.y) * scaleY
+    return this
+  }
+
+  public rotate(angle: number, pivot = this.center()) {
+    const poly = this.toPoly()
+    for (let index = 0; index < poly.length; index++)
+      poly[index]!.rotate(angle, pivot)
+    return poly
+  }
+
+  public devide(v: Vector2 | number) {
+    this.a.devide(v)
+    this.b.devide(v)
+    return this
+  }
+
+  public multiply(v: Vector2 | number) {
+    this.a.multiply(v)
+    this.b.multiply(v)
+    return this
+  }
+
+  public subtract(v: Vector2 | number) {
+    this.a.subtract(v)
+    this.b.subtract(v)
+    return this
+  }
+
+  public center() {
+    return new Vector2((this.a.x + this.b.x) / 2, (this.a.y + this.b.y) / 2)
+  }
+
   public collision(f: PhysicsBody): Vector2 | undefined {
     if (f instanceof Vector2) return this.collisonVector(f)
     if (f instanceof Line) return this.toPoly().collision(f.toPoly())
@@ -115,6 +155,6 @@ export default class Rect implements IPhysicsBody {
   }
 
   public toString() {
-    return `${this.a.x} ${this.a.y} ${this.b.x} ${this.b.y}`
+    return `Rect<${this.a.x}, ${this.a.y}, ${this.b.x}, ${this.b.y}>`
   }
 }

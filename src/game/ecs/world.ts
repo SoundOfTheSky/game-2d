@@ -1,3 +1,5 @@
+import { Constructor } from '@softsky/utils'
+
 import ECSComponent from './component'
 import ECSEntity from './entity'
 import { ECSComponentFilter, ECSQuery } from './query'
@@ -14,6 +16,10 @@ export default class ECSWorld {
   public queueUpdates = new Map<ECSEntity, ECSComponentFilter[] | undefined>()
   public time = 0
   public deltaTime = 0
+  public generatorSystem: Generator<unknown, unknown, unknown>[] = []
+  public systemMap: Omit<Map<Constructor<ECSSystem>, ECSSystem>, 'get'> & {
+    get<T extends ECSSystem>(key: Constructor<T>): T | undefined
+  } = new Map()
 
   public update(time: number) {
     this.deltaTime = time - this.time
@@ -36,6 +42,11 @@ export default class ECSWorld {
     // System update
     for (let index = 0; index < this.systems.length; index++)
       this.systems[index]!.update()
+
+    // Generator systems update
+    for (let index = 0; index < this.generatorSystem.length; index++)
+      if (this.generatorSystem[index]!.next().done)
+        this.generatorSystem.splice(index--, 1)
   }
 
   private updateEntitiesInQueries() {

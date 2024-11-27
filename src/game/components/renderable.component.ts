@@ -3,15 +3,16 @@ import { Optional } from '@softsky/utils'
 import ECSComponent from '@/game/ecs/component'
 
 import ECSEntity from '../ecs/entity'
-import Vector2 from '../physics/body/vector2'
+import Vector2 from '../systems/physics/body/vector2'
 
 export type Renderable = {
   source: CanvasImageSource
   size: Vector2
+  priority?: number
   offset?: Vector2
 }
 /** Requires TransformComponent to be rendered */
-export default class RenderableComponent extends ECSComponent<Renderable> {
+export class RenderableComponent extends ECSComponent<Renderable> {
   public constructor(entity: ECSEntity, data: Optional<Renderable, 'size'>) {
     data.size ??= getDimensionsOfImageSource(data.source)
     super(entity, data as Renderable)

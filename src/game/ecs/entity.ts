@@ -2,7 +2,7 @@ import { Constructor } from '@softsky/utils'
 
 import ECSComponent from './component'
 import ECSEntityPool from './entity-pool'
-import { ECSComponentFilter } from './query'
+import { ECSComponentFilter, ECSKey } from './query'
 import ECSWorld from './world'
 
 /**
@@ -25,7 +25,7 @@ export default class ECSEntity {
 
   public pool?: ECSEntityPool
   public components: Omit<Map<Constructor<ECSComponent>, ECSComponent>, 'get'> & {
-    get<T>(key: Constructor<ECSComponent<T>>): ECSComponent<T> | undefined
+    get<T, C extends ECSComponent<T>>(key: Constructor<C>): C | undefined
   } = new Map()
 
   private tags = new Set<string | number | symbol>()
@@ -47,16 +47,16 @@ export default class ECSEntity {
       : this.tags.has(component)
   }
 
-  public addTag(tag: string) {
+  public addTag(tag: ECSKey) {
     this.world.onNextFrame.push(this.addTagImmediately.bind(this, tag))
   }
 
-  public deleteTag(tag: string) {
+  public deleteTag(tag: ECSKey) {
     this.world.onNextFrame.push(this.deleteTagImmediately.bind(this, tag))
   }
 
-  public hasTag(tag: string) {
-    this.tags.has(tag)
+  public hasTag(tag: ECSKey) {
+    return this.tags.has(tag)
   }
 
   public destroy(): void {
@@ -72,12 +72,12 @@ export default class ECSEntity {
     return update
   }
 
-  public addTagImmediately(tag: string) {
+  public addTagImmediately(tag: ECSKey) {
     this.tags.add(tag)
     this.getQueueUpdates().push(tag)
   }
 
-  public deleteTagImmediately(tag: string) {
+  public deleteTagImmediately(tag: ECSKey) {
     this.tags.delete(tag)
     this.getQueueUpdates().push(tag)
   }

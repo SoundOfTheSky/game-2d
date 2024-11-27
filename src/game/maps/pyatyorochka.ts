@@ -1,9 +1,0 @@
-import Game from '../game'
-
-import SimpleMap from './simple-map'
-
-export default class Pyatyorochka extends SimpleMap {
-  public constructor(game: Game, playerSpawnName?: string, priority?: number) {
-    super(game, 'pyatyorochka', playerSpawnName, priority)
-  }
-}

@@ -1,5 +1,5 @@
 import Game from '../game'
-import Vector2 from '../physics/body/vector2'
+import Vector2 from '../systems/physics/body/vector2'
 
 import Img from './img'
 

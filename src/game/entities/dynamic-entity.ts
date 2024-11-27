@@ -1,4 +1,4 @@
-import Vector2 from '../physics/body/vector2'
+import Vector2 from '../systems/physics/body/vector2'
 
 import Entity, { EntityImage } from './entity'
 

@@ -1,10 +1,10 @@
 import { random } from '@softsky/utils'
 
 import Game from '../game'
-import { PhysicsBody } from '../physics/body'
-import Rect from '../physics/body/rect'
-import Vector2 from '../physics/body/vector2'
 import Img from '../renderable/img'
+import { PhysicsBody } from '../systems/physics/body'
+import Rect from '../systems/physics/body/rect'
+import Vector2 from '../systems/physics/body/vector2'
 
 import DynamicEntity, { Direction } from './dynamic-entity'
 import Entity from './entity'

@@ -39,25 +39,13 @@ export default class TransformSystem extends ECSSystem {
             .clone()
             .subtract(parentTransformComponent.data.position),
         }
-        if (
-          transformComponent.data.rotation
-          || parentTransformComponent.data.rotation
-        ) {
-          transformComponent.data.rotation ??= 0
-          parentTransformComponent.data.rotation ??= 0
+        if (parentTransformComponent.data.rotation || transformComponent.data.rotation)
           data.rotation
-            = transformComponent.data.rotation
-            - parentTransformComponent.data.rotation
-        }
-        if (
-          transformComponent.data.scale
-          || parentTransformComponent.data.scale
-        ) {
-          transformComponent.data.scale ??= 1
-          parentTransformComponent.data.scale ??= 1
-          data.rotation
-            = transformComponent.data.scale - parentTransformComponent.data.scale
-        }
+            = (transformComponent.data.rotation ?? 0)
+            - (parentTransformComponent.data.rotation ?? 0)
+        if (transformComponent.data.scale || parentTransformComponent.data.scale)
+          data.scale
+            = (transformComponent.data.scale ?? 1) - (parentTransformComponent.data.scale ?? 1)
         this.offsetMap.set(parentComponent, data)
       }
       else {
@@ -68,10 +56,10 @@ export default class TransformSystem extends ECSSystem {
           = parentTransformComponent.data.position.y + offset.position.y
         if (offset.rotation)
           transformComponent.data.rotation
-            = parentTransformComponent.data.rotation! + offset.rotation
+            = (parentTransformComponent.data.rotation ?? 0) + offset.rotation
         if (offset.scale)
-          transformComponent.data.rotation
-            = parentTransformComponent.data.scale! + offset.scale
+          transformComponent.data.scale
+            = (parentTransformComponent.data.scale ?? 1) + offset.scale
       }
     }
   }

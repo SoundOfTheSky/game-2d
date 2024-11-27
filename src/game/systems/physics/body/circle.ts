@@ -10,13 +10,42 @@ export default class Circle implements IPhysicsBody {
     public r = 0,
   ) {}
 
-  public clone() {
-    return new Circle(this.c.clone(), this.r)
+  public center() {
+    return this.c
   }
 
-  public add(v: Vector2) {
+  public rotate(angle: number, pivot = this.c) {
+    this.c.rotate(angle, pivot)
+    return this
+  }
+
+  public scale(v: Vector2 | number) {
+    this.r *= Math.max(typeof v === 'number' ? v : v.x, typeof v === 'number' ? v : v.y)
+    return this
+  }
+
+  public add(v: Vector2 | number) {
     this.c.add(v)
     return this
+  }
+
+  public devide(v: Vector2 | number) {
+    this.c.devide(v)
+    return this
+  }
+
+  public multiply(v: Vector2 | number) {
+    this.c.multiply(v)
+    return this
+  }
+
+  public subtract(v: Vector2 | number) {
+    this.c.subtract(v)
+    return this
+  }
+
+  public clone() {
+    return new Circle(this.c.clone(), this.r)
   }
 
   public collision(f: PhysicsBody): Vector2 | undefined {

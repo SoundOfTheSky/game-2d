@@ -1,44 +1,82 @@
-import AnimatedComponent from '../components/animated.component'
-import RenderableComponent from '../components/renderable.component'
+import { AnimationComponent, AnimationFrame } from '../components/animated.component'
+import { RenderableComponent } from '../components/renderable.component'
 import { ECSQuery } from '../ecs/query'
 import { ECSSystem } from '../ecs/system'
 import DefaultWorld from '../worlds/default.world'
 
-export default class RenderSystem extends ECSSystem {
-  declare public world: DefaultWorld
+import Vector2 from './physics/body/vector2'
+
+export class AnimationSystem extends ECSSystem {
+  public declare world: DefaultWorld
   public queue
 
-  public constructor(
-    world: DefaultWorld,
-  ) {
+  public constructor(world: DefaultWorld) {
     super(world)
-    this.queue = new ECSQuery(world, [AnimatedComponent, RenderableComponent])
+    this.queue = new ECSQuery(world, [AnimationComponent])
   }
 
   public update(): void {
     for (const entity of this.queue.matches) {
-      const renderableComponents = entity.components.get(AnimatedComponent)!
-      for (let index = 0; index < renderableComponents.length; index++) {
-        const component = renderableComponents[index]!
-        let timeSinceLastChange = this.world.time - component.data.lastFrameChange
-        let changed = false
+      const animatedComponent = entity.components.get(AnimationComponent)!
+      const renderableComponent
+        = entity.components.get(RenderableComponent)
+        ?? new RenderableComponent(entity, {
+          source: animatedComponent.data.frames[0]!.source!,
+          offset: animatedComponent.data.frames[0]!.offset,
+          size: animatedComponent.data.frames[0]!.size,
+        })
+      let changed = !animatedComponent.data.lastFrameChange
+      let timeSinceLastChange = 0
+      if (animatedComponent.data.lastFrameChange) {
+        timeSinceLastChange = this.world.time - animatedComponent.data.lastFrameChange
         while (true) {
-          const { time } = component.data.frames[component.data.frame]!
+          const { time }
+          = animatedComponent.data.frames[animatedComponent.data.frame]!
           if (!time) break
-          timeSinceLastChange -= time / component.data.speed
+          timeSinceLastChange -= time / animatedComponent.data.speed
           if (timeSinceLastChange <= 0) break
-          if (++component.data.frame === component.data.frames.length) component.data.frame = 0
+          if (
+            ++animatedComponent.data.frame
+            === animatedComponent.data.frames.length
+          )
+            animatedComponent.data.frame = 0
           changed = true
         }
-        if (changed) {
-          const frame = component.data.frames[component.data.frame]!
-          frame.onDraw?.()
-          component.data.lastFrameChange
-            = this.world.time - (frame.time ?? 0)
-            / component.data.speed - timeSinceLastChange
-          // Object.assign(this, frame)
-        }
+      }
+      if (changed) {
+        const frame
+          = animatedComponent.data.frames[animatedComponent.data.frame]!
+        frame.onDraw?.()
+        animatedComponent.data.lastFrameChange
+          = this.world.time
+          - (frame.time ?? 0) / animatedComponent.data.speed
+          - timeSinceLastChange
+        Object.assign(renderableComponent.data, frame)
       }
     }
   }
+}
+
+export function generateAnimation(
+  source: HTMLImageElement,
+  row: number,
+  length: number,
+  size = new Vector2(32, 32),
+  interval = 120,
+  infinite = true,
+) {
+  const frames: Partial<AnimationFrame>[] = []
+  const y = row * size.y
+  for (let index = 0; index < length; index++) {
+    const frame: Partial<AnimationFrame> = {
+      offset: new Vector2(size.x * index, y),
+    }
+    if (index === 0) {
+      frame.source = source
+      frame.size = size
+    }
+    if (index !== length - 1 || infinite) frame.time = interval
+    frames.push(frame)
+  }
+  return frames
 }

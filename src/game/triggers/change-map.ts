@@ -2,14 +2,14 @@ import Entity from '../entities/entity'
 import Player from '../entities/player'
 import Game from '../game'
 import Rodosskaya from '../maps/rodosskaya'
-import { PhysicsBody } from '../physics/body'
-import Vector2 from '../physics/body/vector2'
 import AnimatedImg from '../renderable/animated-img'
 import Img from '../renderable/img'
+import { PhysicsBody } from '../systems/physics/body'
+import Vector2 from '../systems/physics/body/vector2'
 
 const maps = import.meta.glob<true, string, () => Promise<{ default: typeof Rodosskaya }>>('../maps/*.ts')
 
-export default class ChangeMap extends Entity<undefined, undefined> {
+export default class ChangeMap {
   public constructor(game: Game, name: string, priority?: number) {
     super(game, undefined, priority)
     this.name = name

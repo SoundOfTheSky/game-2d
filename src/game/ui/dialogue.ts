@@ -1,7 +1,7 @@
 import Game from '../game'
-import Rect from '../physics/body/rect'
-import Vector2 from '../physics/body/vector2'
 import Img from '../renderable/img'
+import Rect from '../systems/physics/body/rect'
+import Vector2 from '../systems/physics/body/vector2'
 import { Ticker } from '../ticker'
 
 import BG from './bg'

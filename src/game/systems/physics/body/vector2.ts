@@ -8,6 +8,26 @@ export default class Vector2 implements IPhysicsBody {
     public y = 0,
   ) {}
 
+  public center() {
+    return this
+  }
+
+  public rotate(angle: number, pivot = new Vector2()): PhysicsBody {
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    const dx = this.x - pivot.x
+    const dy = this.y - pivot.y
+
+    this.x = cos * dx - sin * dy + pivot.x
+    this.y = sin * dx + cos * dy + pivot.y
+
+    return this
+  }
+
+  public scale() {
+    return this
+  }
+
   public add(v: Vector2 | number) {
     if (v instanceof Vector2) {
       this.x += v.x
@@ -61,8 +81,12 @@ export default class Vector2 implements IPhysicsBody {
   }
 
   public distance(v?: Vector2) {
-    if (v) return Math.hypot((this.x - v.x), (this.y - v.y))
-    return Math.hypot(this.x, this.y)
+    if (v) {
+      const x = this.x - v.x
+      const y = this.y - v.y
+      return Math.sqrt(x * x + y * y)
+    }
+    return Math.sqrt(this.x * this.x + this.y * this.y)
   }
 
   public collision(f: PhysicsBody): Vector2 | undefined {
@@ -88,5 +112,9 @@ export default class Vector2 implements IPhysicsBody {
 
   public equals(v: Vector2) {
     return this.x === v.x && this.y === v.y
+  }
+
+  public toString() {
+    return `Vector2<${this.x},${this.y}>`
   }
 }

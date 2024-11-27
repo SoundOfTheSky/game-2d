@@ -4,7 +4,7 @@ import Car from '../entities/car'
 import Entity from '../entities/entity'
 import Game from '../game'
 import Map from '../maps/map'
-import Vector2 from '../physics/body/vector2'
+import Vector2 from '../systems/physics/body/vector2'
 import { Tickable } from '../ticker'
 
 const TRAFFIC_LIGHT_SPRITE_OFFSET = [

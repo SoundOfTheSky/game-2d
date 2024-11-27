@@ -1,6 +1,10 @@
+import { InputComponent } from '../components/input.component'
+import { VelocityComponent } from '../components/velocity.component'
+import { ECSQuery } from '../ecs/query'
 import { ECSSystem } from '../ecs/system'
 import ECSWorld from '../ecs/world'
-import Vector2 from '../physics/body/vector2'
+
+import Vector2 from './physics/body/vector2'
 
 class InputSystem extends ECSSystem {
   public priority = 100
@@ -11,9 +15,10 @@ class InputSystem extends ECSSystem {
   public pressedKeys = new Map<string, number>()
   public added = new Set<string>()
   public deleted = new Set<string>()
+  public entities$
 
   private toRemove = new Set<string>()
-  private keyToCode = {
+  private keyMapping = {
     KeyW: ['up'],
     ArrowUp: ['up'],
     g12: ['up'],
@@ -35,12 +40,13 @@ class InputSystem extends ECSSystem {
     g5: ['main'],
     m3: ['sub'],
     g4: ['sub'],
-    ShiftLeft: ['run'],
-    g6: ['run'],
+    ShiftLeft: ['move'],
+    g6: ['move'],
   } as Record<string, string[] | undefined>
 
   public constructor(world: ECSWorld) {
     super(world)
+    this.entities$ = new ECSQuery(world, [InputComponent])
     this.gamepads = navigator.getGamepads().filter(Boolean) as Gamepad[]
     globalThis.addEventListener('contextmenu', (event) => {
       event.preventDefault()
@@ -88,6 +94,15 @@ class InputSystem extends ECSSystem {
     if (this.pressedKeys.has('left')) this.move.x -= 1
     this.updateGamepads()
     this.move.normalize(true)
+
+    for (const entity of this.entities$.matches) {
+      const inputComponent = entity.components.get(InputComponent)!
+      const velocityComponent = entity.components.get(VelocityComponent)!
+      if (inputComponent.data.move) {
+        velocityComponent.data.velocity.x = this.move.x
+        velocityComponent.data.velocity.y = this.move.y
+      }
+    }
   }
 
   public checkForKeyPlusRepeat(key: string) {
@@ -148,7 +163,7 @@ class InputSystem extends ECSSystem {
   }
 
   private setByKey(key: string) {
-    const ids = this.keyToCode[key]
+    const ids = this.keyMapping[key]
     if (!ids) return
     for (let index = 0; index < ids.length; index++) {
       const id = ids[index]!
@@ -159,10 +174,10 @@ class InputSystem extends ECSSystem {
   }
 
   private deleteByKey(key: string) {
-    const ids = this.keyToCode[key]
+    const ids = this.keyMapping[key]
     if (!ids) return
     for (let index = 0; index < ids.length; index++)
-      this.toRemove.delete(ids[index]!)
+      this.toRemove.add(ids[index]!)
   }
 }
 export default InputSystem

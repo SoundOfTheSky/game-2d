@@ -12,4 +12,4 @@
 //   ),
 // })
 
-console.log(2)
+Date.now()

@@ -6,6 +6,52 @@ import Vector2 from './vector2'
 import { IPhysicsBody, PhysicsBody } from '.'
 
 export default class Poly extends Array<Vector2> implements IPhysicsBody {
+  public center() {
+    return new Vector2(super.reduce((sum, v) => sum + v.x, 0) / this.length, super.reduce((sum, v) => sum + v.y, 0) / this.length)
+  }
+
+  public rotate(angle: number, pivot = this.center()): PhysicsBody {
+    for (let index = 0; index < this.length; index++)
+      this[index]!.rotate(angle, pivot)
+    return this
+  }
+
+  public scale(v: Vector2 | number) {
+    const center = this.center()
+    const scaleX = typeof v === 'number' ? v : v.x
+    const scaleY = typeof v === 'number' ? v : v.y
+    for (let index = 0; index < this.length; index++) {
+      const p = this[index]!
+      p.x = center.x + (p.x - center.x) * scaleX
+      p.y = center.y + (p.y - center.y) * scaleY
+    }
+    return this
+  }
+
+  public add(v: Vector2) {
+    for (let index = 0; index < this.length; index++)
+      this[index]!.add(v)
+    return this
+  }
+
+  public devide(v: Vector2 | number) {
+    for (let index = 0; index < this.length; index++)
+      this[index]!.devide(v)
+    return this
+  }
+
+  public multiply(v: Vector2 | number) {
+    for (let index = 0; index < this.length; index++)
+      this[index]!.multiply(v)
+    return this
+  }
+
+  public subtract(v: Vector2 | number) {
+    for (let index = 0; index < this.length; index++)
+      this[index]!.subtract(v)
+    return this
+  }
+
   public collision(f: PhysicsBody): Vector2 | undefined {
     if (f instanceof Vector2) return this.collisionCircle(new Circle(f, 0))
     if (f instanceof Line) return this.collisionPoly(f.toPoly())
@@ -16,11 +62,6 @@ export default class Poly extends Array<Vector2> implements IPhysicsBody {
 
   public clone() {
     return new Poly(...super.map(x => x.clone()))
-  }
-
-  public add(v: Vector2) {
-    for (const p of this) p.add(v)
-    return this
   }
 
   public *toLines() {

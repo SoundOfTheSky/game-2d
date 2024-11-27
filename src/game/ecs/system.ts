@@ -1,3 +1,5 @@
+import { Constructor } from '@softsky/utils'
+
 import ECSWorld from './world'
 
 /**
@@ -14,11 +16,18 @@ export class ECSSystem {
     let index = this.world.systems.findIndex(x => x.priority < this.priority)
     if (index === -1) index = this.world.systems.length
     this.world.systems.splice(index, 0, this)
+    this.world.systemMap.set(this.constructor as Constructor<ECSSystem>, this)
   }
 
   /** Function that will be called every tick */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   public update(): void {};
+
+  public destroy() {
+    const index = this.world.systems.indexOf(this)
+    if (index === -1) this.world.systems.splice(index, 1)
+    this.world.systemMap.delete(this.constructor as Constructor<ECSSystem>)
+  }
 }
 
 export class ECSSystemStepped extends ECSSystem {

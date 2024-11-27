@@ -1,6 +1,6 @@
 import Game from '../game'
-import Rect from '../physics/body/rect'
-import Vector2 from '../physics/body/vector2'
+import Rect from '../systems/physics/body/rect'
+import Vector2 from '../systems/physics/body/vector2'
 
 import UIDynamicPlane from './ui-dynamic-plane'
 

@@ -10,9 +10,48 @@ export default class Line implements IPhysicsBody {
     public b: Vector2,
   ) {}
 
-  public add(v: Vector2) {
+  public center() {
+    return new Vector2((this.a.x + this.b.x) / 2, (this.a.y + this.b.y) / 2)
+  }
+
+  public rotate(angle: number, pivot = this.center()) {
+    this.a.rotate(angle, pivot)
+    this.b.rotate(angle, pivot)
+    return this
+  }
+
+  public scale(v: Vector2 | number) {
+    const center = this.center()
+    const scaleX = typeof v === 'number' ? v : v.x
+    const scaleY = typeof v === 'number' ? v : v.y
+    this.a.x = center.x + (this.a.x - center.x) * scaleX
+    this.a.y = center.y + (this.a.y - center.y) * scaleY
+    this.b.x = center.x + (this.b.x - center.x) * scaleX
+    this.b.y = center.y + (this.b.y - center.y) * scaleY
+    return this
+  }
+
+  public add(v: Vector2 | number) {
     this.a.add(v)
     this.b.add(v)
+    return this
+  }
+
+  public devide(v: Vector2 | number) {
+    this.a.devide(v)
+    this.b.devide(v)
+    return this
+  }
+
+  public multiply(v: Vector2 | number) {
+    this.a.multiply(v)
+    this.b.multiply(v)
+    return this
+  }
+
+  public subtract(v: Vector2 | number) {
+    this.a.subtract(v)
+    this.b.subtract(v)
     return this
   }
 

@@ -26,6 +26,7 @@ export default [
       ],
       '@typescript-eslint/no-explicit-any': 0,
       'unicorn/expiring-todo-comments': 0,
+      'unicorn/prefer-modern-math-apis': 0 // Bruh, "modern" math apis are slow af
     },
   },
 ]

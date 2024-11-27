@@ -8,4 +8,3 @@ export default class CanvasComponent extends ECSComponent<HTMLCanvasElement> {
     this._data = value
   }
 }
- 

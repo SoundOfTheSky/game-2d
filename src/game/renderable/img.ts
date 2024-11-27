@@ -1,5 +1,5 @@
 import Game from '../game'
-import Vector2 from '../physics/body/vector2'
+import Vector2 from '../systems/physics/body/vector2'
 import { Tickable } from '../ticker'
 
 export default class Img extends Tickable {
