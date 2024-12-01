@@ -18,15 +18,7 @@ export default class ECSComponent<T = any> {
   public id = ++ECSComponent.lastId
   public registered = false
 
-  protected _data!: T
-
-  public get data(): T {
-    return this._data
-  }
-
-  public set data(value: T) {
-    this._data = value
-  }
+  public data!: T
 
   public constructor(
     public entity: ECSEntity,

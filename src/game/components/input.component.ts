@@ -1,12 +1,23 @@
+import { Optional } from '@softsky/utils'
+
 import ECSComponent from '@/game/ecs/component'
 
-import { ECSKey } from '../ecs/query'
+import ECSEntity from '../ecs/entity'
 
-import { AbilityComponent } from './ability.component'
+import { Ability } from './abilities.component'
 
 export type InputComponentData = {
   move?: boolean
   look?: boolean
-  actions?: Record<ECSKey, AbilityComponent>
+  actions: Record<string, Ability>
+  startAction: Set<Ability>
+  stopAction: Set<Ability>
 }
-export class InputComponent extends ECSComponent<InputComponentData> {}
+export class InputComponent extends ECSComponent<InputComponentData> {
+  public constructor(entity: ECSEntity, data: Optional<InputComponentData, 'startAction' | 'stopAction' | 'actions'>) {
+    data.actions ??= {}
+    data.startAction ??= new Set()
+    data.stopAction ??= new Set()
+    super(entity, data as InputComponentData)
+  }
+}

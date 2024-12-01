@@ -22,6 +22,7 @@ export default class ECSEntity {
   public id = ++ECSEntity.lastId
   public registered = false
   public version = 1
+  public created!: number
 
   public pool?: ECSEntityPool
   public components: Omit<Map<Constructor<ECSComponent>, ECSComponent>, 'get'> & {
@@ -39,6 +40,7 @@ export default class ECSEntity {
     this.world.entities.push(this)
     this.getQueueUpdates().push(...this.tags, ...this.components.keys())
     this.registered = true
+    this.created = this.world.time
   }
 
   public has(component: ECSComponentFilter) {

@@ -18,12 +18,13 @@ export default class Game {
 
   public tick(time: number) {
     this.world.update(time)
+    // let fakeT = 0
     requestAnimationFrame((t) => {
       this.tick(t)
     })
     // setTimeout(() => {
     //   this.tick(performance.now());
-    // }, 1000);
+    // }, 1);
   }
 
   private async preloadResources(resources: string[]) {

@@ -4,6 +4,7 @@ import { InputComponent } from '../components/input.component'
 import { TransformComponent } from '../components/transform.component'
 import { VelocityComponent } from '../components/velocity.component'
 import ECSEntity from '../ecs/entity'
+import DashAbility from '../systems/abilities/dash.ability'
 import { generateAnimation } from '../systems/animation.system'
 import Circle from '../systems/physics/body/circle'
 import Vector2 from '../systems/physics/body/vector2'
@@ -18,7 +19,7 @@ export default function createPlayer(world: DefaultWorld, options: {
     position: options.position,
   })
   const source = world.resources['/game/mc.png'] as HTMLImageElement
-  new AnimationComponent(entity, {
+  const animationComponent = new AnimationComponent(entity, {
     animations: {
       walkUp: generateAnimation(source, 0, 6),
       walkDown: generateAnimation(source, 1, 6),
@@ -35,9 +36,10 @@ export default function createPlayer(world: DefaultWorld, options: {
       emoteJump: generateAnimation(source, 11, 6, undefined, undefined, false),
     },
   })
-  new InputComponent(entity, {
-    move: true,
-  })
+  animationComponent.data.animations!.idleUp![0]!.time = 1800
+  animationComponent.data.animations!.idleDown![0]!.time = 1800
+  animationComponent.data.animations!.idleRight![0]!.time = 1800
+  animationComponent.data.animations!.idleLeft![0]!.time = 1800
   new VelocityComponent(entity, {
     terminalVelocity: 0.05,
   })
@@ -49,6 +51,12 @@ export default function createPlayer(world: DefaultWorld, options: {
         const tC = myHitbox.entity.components.get(TransformComponent)!
         tC.data.position.subtract(separetionVector)
       }
+    },
+  })
+  new InputComponent(entity, {
+    move: true,
+    actions: {
+      move: new DashAbility(entity),
     },
   })
   entity.addTag(camFollowTag)

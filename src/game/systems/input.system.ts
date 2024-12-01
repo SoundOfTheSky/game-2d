@@ -41,6 +41,7 @@ class InputSystem extends ECSSystem {
     m3: ['sub'],
     g4: ['sub'],
     ShiftLeft: ['move'],
+    Space: ['move'],
     g6: ['move'],
   } as Record<string, string[] | undefined>
 
@@ -77,8 +78,6 @@ class InputSystem extends ECSSystem {
   }
 
   public update() {
-    this.added.clear()
-    this.deleted.clear()
     for (const k of this.toRemove) {
       this.pressedKeys.delete(k)
       this.deleted.add(k)
@@ -94,15 +93,25 @@ class InputSystem extends ECSSystem {
     if (this.pressedKeys.has('left')) this.move.x -= 1
     this.updateGamepads()
     this.move.normalize(true)
-
     for (const entity of this.entities$.matches) {
       const inputComponent = entity.components.get(InputComponent)!
-      const velocityComponent = entity.components.get(VelocityComponent)!
-      if (inputComponent.data.move) {
+      const velocityComponent = entity.components.get(VelocityComponent)
+      // === Vectors to movement ===
+      if (inputComponent.data.move && velocityComponent) {
         velocityComponent.data.velocity.x = this.move.x
         velocityComponent.data.velocity.y = this.move.y
       }
+      // === Buttons to actions ===
+      inputComponent.data.startAction.clear()
+      inputComponent.data.stopAction.clear()
+      for (const key in inputComponent.data.actions) {
+        const action = inputComponent.data.actions[key]!
+        if (this.added.has(key)) inputComponent.data.startAction.add(action)
+        else if (this.deleted.has(key)) inputComponent.data.stopAction.add(action)
+      }
     }
+    this.added.clear()
+    this.deleted.clear()
   }
 
   public checkForKeyPlusRepeat(key: string) {

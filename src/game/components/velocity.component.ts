@@ -17,7 +17,7 @@ export class VelocityComponent extends ECSComponent<VelocityComponentData> {
   }
 
   public isZero() {
-    return this._data.velocity.x === 0 && this._data.velocity.y === 0
+    return this.data.velocity.x === 0 && this.data.velocity.y === 0
   }
 }
 

@@ -34,6 +34,7 @@ export class AnimationSystem extends ECSSystem {
           = animatedComponent.data.frames[animatedComponent.data.frame]!
           if (!time) break
           timeSinceLastChange -= time / animatedComponent.data.speed
+          // console.log(animatedComponent.data.frame, time, timeSinceLastChange)
           if (timeSinceLastChange <= 0) break
           if (
             ++animatedComponent.data.frame

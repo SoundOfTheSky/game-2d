@@ -81,6 +81,8 @@ export default class Line implements IPhysicsBody {
   }
 
   public toRect(): Rect {
-    return new Rect(this.a.clone(), this.b.clone())
+    return new Rect(
+      new Vector2(Math.min(this.a.x, this.b.x), Math.min(this.a.y, this.b.y)),
+      new Vector2(Math.max(this.a.x, this.b.x), Math.max(this.a.y, this.b.y)))
   }
 }

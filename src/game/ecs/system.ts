@@ -30,7 +30,7 @@ export class ECSSystem {
   }
 }
 
-export class ECSSystemStepped extends ECSSystem {
+export class ECSFixedUpdateSystem extends ECSSystem {
   public leftoverTime = 0
   public timeBetweenUpdates = 16.6
 
@@ -38,10 +38,9 @@ export class ECSSystemStepped extends ECSSystem {
     const accumulatedTime = this.leftoverTime + this.world.deltaTime
     const steps = accumulatedTime / this.timeBetweenUpdates
     this.leftoverTime = accumulatedTime - (steps * this.timeBetweenUpdates)
-    for (let step = 0; step < steps; step++)
-      this.updateStepped()
+    for (let step = 0; step < steps; step++) this.fixedUpdate()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public updateStepped(): void {}
+  public fixedUpdate(): void {}
 }

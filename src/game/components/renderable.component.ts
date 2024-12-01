@@ -8,7 +8,8 @@ import Vector2 from '../systems/physics/body/vector2'
 export type Renderable = {
   source: CanvasImageSource
   size: Vector2
-  priority?: number
+  opacity?: number
+  order?: number
   offset?: Vector2
 }
 /** Requires TransformComponent to be rendered */

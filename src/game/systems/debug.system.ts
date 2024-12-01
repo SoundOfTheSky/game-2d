@@ -17,7 +17,7 @@ export default class DebugSystem extends ECSSystem {
     for (const entity of this.queue.matches) {
       const transformComponent = entity.components.get(TransformComponent)
       const velocityComponent = entity.components.get(VelocityComponent)
-      console.log(transformComponent?.data.position.toString())
+      // console.log(transformComponent?.data.position.toString())
     }
   }
 }

@@ -36,33 +36,34 @@ export class RenderSystem extends ECSSystem {
   }
 
   private updateEntities() {
-    const order: {
+    const ordered: {
       renderableComponent: RenderableComponent
       transformComponent: TransformComponent
-      priority: number
+      order: number
     }[] = []
     for (const entity of this.renderables$.matches) {
       const renderableComponent = entity.components.get(RenderableComponent)!
       const transformComponent
         = entity.components.get(TransformComponent)
         ?? new TransformComponent(entity)
-      const priority = renderableComponent.data.priority ?? transformComponent.data.position.y
-      const index = order.findIndex(entity => entity.priority < priority)
-      order.splice(index === -1 ? this.world.systems.length : index, 0, {
+      const order = renderableComponent.data.order ?? transformComponent.data.position.y
+      const index = ordered.findIndex(entity => entity.order > order)
+      ordered.splice(index === -1 ? this.world.systems.length : index, 0, {
         renderableComponent,
         transformComponent,
-        priority,
+        order,
       })
     }
-    for (let index = 0; index < order.length; index++) {
-      const { renderableComponent, transformComponent } = order[index]!
+    for (let index = 0; index < ordered.length; index++) {
+      const { renderableComponent, transformComponent } = ordered[index]!
+      if (renderableComponent.data.opacity !== undefined) this.world.context.globalAlpha = renderableComponent.data.opacity
       if (transformComponent.data.rotation) this.drawRotated(renderableComponent, transformComponent)
       else {
         const zoom = (transformComponent.data.scale ?? 1) * this.zoom
-        const x = ~~(transformComponent.data.position.x - this.position.x) * this.zoom
-        const y = ~~(transformComponent.data.position.y - this.position.y) * this.zoom
-        const w = ~~renderableComponent.data.size.x * zoom
-        const h = ~~renderableComponent.data.size.y * zoom
+        const x = ~~((transformComponent.data.position.x - this.position.x) * this.zoom)
+        const y = ~~((transformComponent.data.position.y - this.position.y) * this.zoom)
+        const w = ~~(renderableComponent.data.size.x * zoom)
+        const h = ~~(renderableComponent.data.size.y * zoom)
         this.world.context.drawImage(
           renderableComponent.data.source,
           renderableComponent.data.offset?.x ?? 0,
@@ -75,6 +76,7 @@ export class RenderSystem extends ECSSystem {
           h,
         )
       }
+      this.world.context.globalAlpha = 1
     }
   }
 
@@ -84,8 +86,8 @@ export class RenderSystem extends ECSSystem {
     const y = (transformComponent.data.position.y - this.position.y) * this.zoom
     const w = renderableComponent.data.size.x * zoom
     const h = renderableComponent.data.size.y * zoom
-    const hw = ~~(w / 2)
-    const hh = ~~(h / 2)
+    const hw = (w / 2)
+    const hh = (h / 2)
     this.world.context.translate(x + hw, y + hh)
     this.world.context.rotate(transformComponent.data.rotation!)
     this.world.context.drawImage(
@@ -121,12 +123,12 @@ export class RenderSystem extends ECSSystem {
         p.x += transformComponent.data.position.x
         p.y += transformComponent.data.position.y
       }
-      p.x = ~~(p.x / this.follow$.matches.size - this.world.canvas.width / 2 / this.zoom)
-      p.y = ~~(p.y / this.follow$.matches.size - this.world.canvas.height / 2 / this.zoom)
+      p.x = (p.x / this.follow$.matches.size - this.world.canvas.width / 2 / this.zoom)
+      p.y = (p.y / this.follow$.matches.size - this.world.canvas.height / 2 / this.zoom)
     }
     const x = p.x - this.position.x
     const y = p.y - this.position.y
-    this.position.x += ~~(x / 10)
-    this.position.y += ~~(y / 10)
+    this.position.x += (x / 16)
+    this.position.y += (y / 16)
   }
 }

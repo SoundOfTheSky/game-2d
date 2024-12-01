@@ -90,7 +90,7 @@ export default class MapSystem extends ECSSystem {
       new RenderableComponent(entity, {
         source: canvas,
         size: new Vector2(width, height),
-        priority: index < 3 ? height : 0,
+        order: index < 3 ? 0 : height,
       })
       const { context } = initCanvas(canvas, width, height)
       for (let index = 0; index < layer.data.length; index++) {

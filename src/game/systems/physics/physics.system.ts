@@ -1,17 +1,20 @@
+import ECSEntity from 'src/game/ecs/entity'
+
 import { HitboxComponent } from '../../components/hitbox.component'
 import { TransformComponent } from '../../components/transform.component'
 import { VelocityComponent } from '../../components/velocity.component'
 import { ECSQuery } from '../../ecs/query'
-import { ECSSystem } from '../../ecs/system'
+import { ECSFixedUpdateSystem } from '../../ecs/system'
 import DefaultWorld from '../../worlds/default.world'
 
 import Rect from './body/rect'
 import RTree from './rtree'
 
-export default class PhysicsSystem extends ECSSystem {
+export default class PhysicsSystem extends ECSFixedUpdateSystem {
   public declare world: DefaultWorld
   public entities$
 
+  private lastEntities = new Set<ECSEntity>()
   private staticRTree = new RTree()
   private rtree = new RTree()
   private rectHitbox = new WeakMap<Rect, HitboxComponent>()
@@ -21,11 +24,12 @@ export default class PhysicsSystem extends ECSSystem {
     this.entities$ = new ECSQuery(world, [TransformComponent, HitboxComponent])
   }
 
-  public update() {
+  public fixedUpdate() {
     this.updateDeleted()
     for (const entity of this.entities$.matches) {
       const velocityComponent = entity.components.get(VelocityComponent)
-      if (!this.entities$.added.has(entity)
+      // Update entites with not zero velocity, that have tag to explicit update or simply new
+      if (this.lastEntities.has(entity)
         && !entity.hasTag('physicsUpdated')
         && (!velocityComponent || velocityComponent.isZero())
       )
@@ -47,6 +51,9 @@ export default class PhysicsSystem extends ECSSystem {
         }
       }
     }
+    this.lastEntities.clear()
+    for (const entity of this.entities$.matches)
+      this.lastEntities.add(entity)
   }
 
   private updateEntityComponents(
@@ -56,28 +63,26 @@ export default class PhysicsSystem extends ECSSystem {
   ) {
     if (velocityComponent) {
       if (velocityComponent.data.acceleration) {
-        velocityComponent.data.velocity.x += velocityComponent.data.acceleration.x * this.world.deltaTime
-        velocityComponent.data.velocity.y += velocityComponent.data.acceleration.y * this.world.deltaTime
+        velocityComponent.data.velocity.x += velocityComponent.data.acceleration.x * this.timeBetweenUpdates
+        velocityComponent.data.velocity.y += velocityComponent.data.acceleration.y * this.timeBetweenUpdates
       }
       if (velocityComponent.data.terminalVelocity)
         velocityComponent.data.velocity.normalize(true, velocityComponent.data.terminalVelocity)
       if (!velocityComponent.isZero()) {
         velocityComponent.data.lastDirection.x = velocityComponent.data.velocity.x
         velocityComponent.data.lastDirection.y = velocityComponent.data.velocity.y
-        transformComponent.data.position.x += velocityComponent.data.velocity.x * this.world.deltaTime
-        transformComponent.data.position.y += velocityComponent.data.velocity.y * this.world.deltaTime
+        transformComponent.data.position.x += velocityComponent.data.velocity.x * this.timeBetweenUpdates
+        transformComponent.data.position.y += velocityComponent.data.velocity.y * this.timeBetweenUpdates
       }
     }
     const worldBody = hitboxComponent.data.body.clone().add(transformComponent.data.position)
     if (transformComponent.data.scale) worldBody.scale(transformComponent.data.scale)
     if (transformComponent.data.rotation) worldBody.rotate(transformComponent.data.rotation)
-
     if (hitboxComponent.data.rect) {
       if (velocityComponent) this.rtree.remove(hitboxComponent.data.rect)
       else this.staticRTree.remove(hitboxComponent.data.rect)
       this.rectHitbox.delete(hitboxComponent.data.rect)
     }
-
     const rect = worldBody.toRect()
     hitboxComponent.data.worldBody = worldBody
     hitboxComponent.data.rect = rect
@@ -87,7 +92,9 @@ export default class PhysicsSystem extends ECSSystem {
   }
 
   private updateDeleted() {
-    for (const entity of this.entities$.deleted) {
+    for (const entity of this.lastEntities) {
+      // Difference function is slower than just this check
+      if (this.entities$.matches.has(entity)) continue
       const hitboxComponent = entity.components.get(HitboxComponent)
       if (hitboxComponent?.data.rect) {
         this.rectHitbox.delete(hitboxComponent.data.rect)

@@ -37,18 +37,18 @@ export class AnimationComponent extends ECSComponent<AnimationComponentData> {
 
   public play(animation: ECSKey | AnimationFrame[]) {
     if (Array.isArray(animation)) {
-      delete this._data.animationName
-      this._data.frames = animation
+      delete this.data.animationName
+      this.data.frames = animation
     }
     else {
-      this._data.animationName = animation
-      this._data.frames = this._data.animations![animation]!
+      this.data.animationName = animation
+      this.data.frames = this.data.animations![animation]!
     }
-    this._data.frame = 0
-    delete this._data.lastFrameChange
+    this.data.frame = 0
+    delete this.data.lastFrameChange
   }
 
   public playIfNotPlaying(animationName: ECSKey) {
-    if (this._data.animationName !== animationName) this.play(animationName)
+    if (this.data.animationName !== animationName) this.play(animationName)
   }
 }

@@ -91,7 +91,10 @@ export class ECSQuery {
     }
     for (let index = 0; index < this.world.entities.length; index++) {
       const entity = this.world.entities[index]!
-      if (this.checkEntity(entity)) this.matches.add(entity)
+      if (this.checkEntity(entity)) {
+        this.matches.add(entity)
+        this.added.add(entity)
+      }
     }
   }
 
