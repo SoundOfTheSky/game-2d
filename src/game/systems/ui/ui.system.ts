@@ -1,8 +1,8 @@
-import { ECSSystem } from '../ecs/system'
-import DefaultWorld from '../worlds/default.world'
+import { ECSSystem } from '../../ecs/system'
+import DefaultWorld from '../../worlds/default.world'
 
 export default class UISystem extends ECSSystem {
-  public declare world: DefaultWorld
+  declare public world: DefaultWorld
   public printValues = new Map<string, string | number>()
   public boundingBox!: DOMRect
   public c
@@ -24,11 +24,14 @@ export default class UISystem extends ECSSystem {
     this.c.append(this.printValuesC)
 
     this.updateContainerSize()
-    this.world.canvas.addEventListener('resize', this.updateContainerSize.bind(this))
+    this.world.canvas.addEventListener(
+      'resize',
+      this.updateContainerSize.bind(this),
+    )
 
     this.startCountTime = this.world.time
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '=') {
+    document.addEventListener('keydown', (event) => {
+      if (event.key === '=') {
         this.minFPS = 1000
         this.startCountTime = this.world.time
         this.frames = 0
@@ -36,7 +39,7 @@ export default class UISystem extends ECSSystem {
     })
   }
 
-  public update(): void {
+  public tick(): void {
     this.calcFPS()
     this.printValuesC.innerHTML = ''
     for (const [key, value] of this.printValues) {
@@ -44,14 +47,15 @@ export default class UISystem extends ECSSystem {
     }
   }
 
-  private calcFPS() {
+  protected calcFPS() {
     const fps = 1000 / this.world.deltaTime
     if (fps < this.minFPS) this.minFPS = fps
-    const medianFPS = 1000 / ((this.world.time - this.startCountTime) / this.frames++)
+    const medianFPS =
+      1000 / ((this.world.time - this.startCountTime) / this.frames++)
     this.printValues.set('FPS', `${~~fps + 1}/${~~this.minFPS}/${~~medianFPS}`)
   }
 
-  private updateContainerSize() {
+  protected updateContainerSize() {
     this.boundingBox = this.world.canvas.getBoundingClientRect()
     this.c.style.left = this.boundingBox.left + 'px'
     this.c.style.top = this.boundingBox.top + 'px'

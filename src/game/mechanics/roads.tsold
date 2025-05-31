@@ -39,7 +39,9 @@ export default class Roads extends Tickable {
     priority?: number,
   ) {
     super(game, priority)
-    this.cityPropsImg = this.game.resources['/game/tilesets/3_City_Props_16x16.png'] as HTMLImageElement
+    this.cityPropsImg = this.game.resources[
+      '/game/tilesets/3_City_Props_16x16.png'
+    ] as HTMLImageElement
   }
 
   public tick(): void {
@@ -47,7 +49,9 @@ export default class Roads extends Tickable {
       const path = this.paths[index]!
       const timeDelta = this.game.time - (path.nextSpawnTime ?? 0)
       if (timeDelta >= 0) {
-        path.nextSpawnTime = this.game.time + random(path.minSpawnTime ?? 2000, path.maxSpawnTime ?? 12_000)
+        path.nextSpawnTime =
+          this.game.time +
+          random(path.minSpawnTime ?? 2000, path.maxSpawnTime ?? 12_000)
         const car = new Car(this.game, path.path)
         car.name = path.name
         car.stopZones = path.stopZones
@@ -68,31 +72,37 @@ export default class Roads extends Tickable {
       const timeDelta = this.game.time - stop.nextChangeTime
       if (timeDelta >= 0) {
         switch (stop.status) {
-          case 0: { // Green->Yellow
+          case 0: {
+            // Green->Yellow
             stop.nextChangeTime = this.game.time + 2000
             stop.status = 1
             for (let index2 = 0; index2 < this.paths.length; index2++) {
               const path = this.paths[index2]!
-              if (stop.pathNames.includes(path.name)) path.stopZones.add(stop.hitbox)
+              if (stop.pathNames.includes(path.name))
+                path.stopZones.add(stop.hitbox)
             }
             break
           }
-          case 1: { // Yellow->Red
+          case 1: {
+            // Yellow->Red
             stop.nextChangeTime = this.game.time + stop.time
             stop.status = 2
             break
           }
-          case 2: { // Red->Yellow
+          case 2: {
+            // Red->Yellow
             stop.nextChangeTime = this.game.time + 2000
             stop.status = 3
             break
           }
-          case 3: { // Yellow->Green
+          case 3: {
+            // Yellow->Green
             stop.nextChangeTime = this.game.time + stop.time
             stop.status = 0
             for (let index2 = 0; index2 < this.paths.length; index2++) {
               const path = this.paths[index2]!
-              if (stop.pathNames.includes(path.name)) path.stopZones.delete(stop.hitbox)
+              if (stop.pathNames.includes(path.name))
+                path.stopZones.delete(stop.hitbox)
             }
             break
           }

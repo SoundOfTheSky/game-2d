@@ -20,7 +20,10 @@ export default class Circle implements IPhysicsBody {
   }
 
   public scale(v: Vector2 | number) {
-    this.r *= Math.max(typeof v === 'number' ? v : v.x, typeof v === 'number' ? v : v.y)
+    this.r *= Math.max(
+      typeof v === 'number' ? v : v.x,
+      typeof v === 'number' ? v : v.y,
+    )
     return this
   }
 
@@ -54,7 +57,8 @@ export default class Circle implements IPhysicsBody {
       if (d < 0) return this.c.clone().subtract(f).normalize().multiply(d)
       return
     }
-    if (f instanceof Line || f instanceof Rect) return f.toPoly().collision(this)?.multiply(-1)
+    if (f instanceof Line || f instanceof Rect)
+      return f.toPoly().collision(this)?.multiply(-1)
     if (f instanceof Circle) {
       const d = this.c.distance(f.c) - this.r - f.r
       if (d < 0) return this.c.clone().subtract(f.c).normalize().multiply(d)

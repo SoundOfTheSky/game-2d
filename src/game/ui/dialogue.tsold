@@ -10,7 +10,11 @@ import BGBig from './bg-big'
 export type DialogueItem = {
   text: string
   auto?: number
-  next?: (options: { item: DialogueItem, textI: number, timeSinceLastChange: number }) => boolean
+  next?: (options: {
+    item: DialogueItem
+    textI: number
+    timeSinceLastChange: number
+  }) => boolean
   speed?: number
   sound?: HTMLAudioElement
   portrait?: Img
@@ -26,19 +30,15 @@ export default class Dialogue extends Ticker {
   public scale = 4
   public fontSize!: number
   public fontSpacing!: number
-  private queueI = 0
-  private textI = 0
-  private lastLetterTime = 0
-  private textPos!: Vector2
-  private namePos!: Vector2
-  private portraitPos!: Vector2
-  private portraitScale!: number
+  protected queueI = 0
+  protected textI = 0
+  protected lastLetterTime = 0
+  protected textPos!: Vector2
+  protected namePos!: Vector2
+  protected portraitPos!: Vector2
+  protected portraitScale!: number
 
-  public constructor(
-    game: Game,
-    item: DialogueItem,
-    priority?: number,
-  ) {
+  public constructor(game: Game, item: DialogueItem, priority?: number) {
     super(game, priority)
     this.queue.push(item)
     this.updateUIs()
@@ -56,7 +56,11 @@ export default class Dialogue extends Ticker {
       this.game,
       new Rect(
         // 3.5 so UI has some padding
-        new Vector2(0, this.game.canvas.height - ~~Math.min(bgTileScaled * 3.5, this.game.canvas.height / 3)),
+        new Vector2(
+          0,
+          this.game.canvas.height -
+            ~~Math.min(bgTileScaled * 3.5, this.game.canvas.height / 3),
+        ),
         new Vector2(this.game.canvas.width, this.game.canvas.height),
       ),
       scale,
@@ -78,8 +82,14 @@ export default class Dialogue extends Ticker {
           this.bgUI.rect.a.y + padding.y - this.bgUI.borderScaled,
         ),
         new Vector2(
-          this.bgUI.rect.a.x + padding.x + this.bgUI.borderScaled + nameTileScaled * 12,
-          this.bgUI.rect.a.y + padding.y - this.bgUI.borderScaled + nameTileScaled * 2,
+          this.bgUI.rect.a.x +
+            padding.x +
+            this.bgUI.borderScaled +
+            nameTileScaled * 12,
+          this.bgUI.rect.a.y +
+            padding.y -
+            this.bgUI.borderScaled +
+            nameTileScaled * 2,
         ),
       ),
       scale,
@@ -87,7 +97,12 @@ export default class Dialogue extends Ticker {
     this.namePos = this.nameUI.rect.a
       .clone()
       .add(this.nameUI.getSizes().padding)
-      .add(new Vector2(this.nameUI.tileScaled, this.nameUI.tileScaled / 2 + scale * 2))
+      .add(
+        new Vector2(
+          this.nameUI.tileScaled,
+          this.nameUI.tileScaled / 2 + scale * 2,
+        ),
+      )
     this.textPos.add(new Vector2(bgTileScaled, bgTileScaled))
   }
 

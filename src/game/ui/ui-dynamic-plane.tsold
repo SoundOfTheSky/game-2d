@@ -22,7 +22,10 @@ export default class UIDynamicPlane extends Tickable {
   public getSizes() {
     const tileSize = this.tileSize.clone().multiply(this.scale)
     // Size in tiles. If more than 5, make it odd to add custom decorations
-    const size = new Vector2(~~(this.rect.w / tileSize.x), ~~(this.rect.h / tileSize.y))
+    const size = new Vector2(
+      ~~(this.rect.w / tileSize.x),
+      ~~(this.rect.h / tileSize.y),
+    )
     if (this.isLarge) {
       if (size.x > 5 && size.x % 2 === 0) size.x--
       if (size.y > 5 && size.y % 2 === 0) size.y--

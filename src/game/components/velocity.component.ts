@@ -10,7 +10,10 @@ export type VelocityComponentData = {
   terminalVelocity?: number
 }
 export class VelocityComponent extends ECSComponent<VelocityComponentData> {
-  public constructor(entity: ECSEntity, data: Partial<VelocityComponentData> = {}) {
+  public constructor(
+    entity: ECSEntity,
+    data: Partial<VelocityComponentData> = {},
+  ) {
     data.velocity ??= new Vector2()
     data.lastDirection ??= new Vector2(0, 1)
     super(entity, data as VelocityComponentData)

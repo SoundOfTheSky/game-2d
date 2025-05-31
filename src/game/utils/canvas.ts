@@ -1,5 +1,8 @@
-// eslint-disable-next-line import-x/prefer-default-export
-export function initCanvas(canvas: HTMLCanvasElement, width?: number, height?: number) {
+export function initCanvas(
+  canvas: HTMLCanvasElement,
+  width?: number,
+  height?: number,
+) {
   const boundingBox = canvas.getBoundingClientRect()
   canvas.width = width ?? boundingBox.width * window.devicePixelRatio
   canvas.height = height ?? boundingBox.height * window.devicePixelRatio

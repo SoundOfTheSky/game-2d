@@ -3,7 +3,6 @@ import { Optional } from '@softsky/utils'
 import ECSComponent from '@/game/ecs/component'
 
 import ECSEntity from '../ecs/entity'
-import { ECSKey } from '../ecs/query'
 
 import { Renderable } from './renderable.component'
 
@@ -16,12 +15,18 @@ export type AnimationComponentData = {
   speed: number
   frame: number
   lastFrameChange?: number
-  animationName?: ECSKey
-  animations?: Record<ECSKey, AnimationFrame[]>
+  animationName?: string
+  animations?: Record<string, AnimationFrame[]>
 }
 
 export class AnimationComponent extends ECSComponent<AnimationComponentData> {
-  public constructor(entity: ECSEntity, data: Optional<AnimationComponentData, 'speed' | 'frame' | 'lastFrameChange' | 'frames'>) {
+  public constructor(
+    entity: ECSEntity,
+    data: Optional<
+      AnimationComponentData,
+      'speed' | 'frame' | 'lastFrameChange' | 'frames'
+    >,
+  ) {
     data.speed ??= 1
     data.frame ??= 0
     if (!data.frames) {
@@ -29,18 +34,16 @@ export class AnimationComponent extends ECSComponent<AnimationComponentData> {
       if (animationName) {
         data.animationName = animationName
         data.frames = data.animations![animationName]!
-      }
-      else data.frames = []
+      } else data.frames = []
     }
     super(entity, data as AnimationComponentData)
   }
 
-  public play(animation: ECSKey | AnimationFrame[]) {
+  public play(animation: string | AnimationFrame[]) {
     if (Array.isArray(animation)) {
       delete this.data.animationName
       this.data.frames = animation
-    }
-    else {
+    } else {
       this.data.animationName = animation
       this.data.frames = this.data.animations![animation]!
     }
@@ -48,7 +51,7 @@ export class AnimationComponent extends ECSComponent<AnimationComponentData> {
     delete this.data.lastFrameChange
   }
 
-  public playIfNotPlaying(animationName: ECSKey) {
+  public playIfNotPlaying(animationName: string) {
     if (this.data.animationName !== animationName) this.play(animationName)
   }
 }

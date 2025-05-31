@@ -39,11 +39,11 @@ export default class Rhythm implements Tickable {
     this.checkNotes();
   }
 
-  private getTimings(note: Note) {
+  protected getTimings(note: Note) {
     return note.timings ?? this.options.timings;
   }
 
-  private checkIfNoteIsHit(note: Note) {
+  protected checkIfNoteIsHit(note: Note) {
     return (
       (note.holdFor ? this.game.input.has(note.key) : this.game.input.getTicks(note.key) === 1) &&
       (note.mouse === undefined ||
@@ -52,7 +52,7 @@ export default class Rhythm implements Tickable {
     );
   }
 
-  private checkNotes() {
+  protected checkNotes() {
     const usedKeys = new Set<string>();
     for (let i = 0; i < this.notes.length; i++) {
       const note = this.notes[i];
@@ -77,7 +77,7 @@ export default class Rhythm implements Tickable {
     }
   }
 
-  private checkHoldNotes() {
+  protected checkHoldNotes() {
     for (let i = 0; i < this.holdNotes.length; i++) {
       const note = this.holdNotes[i];
       if (this.checkIfNoteIsHit(note)) {

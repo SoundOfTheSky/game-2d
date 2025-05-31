@@ -7,7 +7,10 @@ import { IPhysicsBody, PhysicsBody } from '.'
 
 export default class Poly extends Array<Vector2> implements IPhysicsBody {
   public center() {
-    return new Vector2(super.reduce((sum, v) => sum + v.x, 0) / this.length, super.reduce((sum, v) => sum + v.y, 0) / this.length)
+    return new Vector2(
+      super.reduce((sum, v) => sum + v.x, 0) / this.length,
+      super.reduce((sum, v) => sum + v.y, 0) / this.length,
+    )
   }
 
   public rotate(angle: number, pivot = this.center()): PhysicsBody {
@@ -29,26 +32,22 @@ export default class Poly extends Array<Vector2> implements IPhysicsBody {
   }
 
   public add(v: Vector2) {
-    for (let index = 0; index < this.length; index++)
-      this[index]!.add(v)
+    for (let index = 0; index < this.length; index++) this[index]!.add(v)
     return this
   }
 
   public devide(v: Vector2 | number) {
-    for (let index = 0; index < this.length; index++)
-      this[index]!.devide(v)
+    for (let index = 0; index < this.length; index++) this[index]!.devide(v)
     return this
   }
 
   public multiply(v: Vector2 | number) {
-    for (let index = 0; index < this.length; index++)
-      this[index]!.multiply(v)
+    for (let index = 0; index < this.length; index++) this[index]!.multiply(v)
     return this
   }
 
   public subtract(v: Vector2 | number) {
-    for (let index = 0; index < this.length; index++)
-      this[index]!.subtract(v)
+    for (let index = 0; index < this.length; index++) this[index]!.subtract(v)
     return this
   }
 
@@ -61,11 +60,16 @@ export default class Poly extends Array<Vector2> implements IPhysicsBody {
   }
 
   public clone() {
-    return new Poly(...super.map(x => x.clone()))
+    return new Poly(...super.map((x) => x.clone()))
   }
 
   public *toLines() {
-    for (let index1 = 0, index2 = this.length - 1; index1 < this.length; index2 = index1++) yield new Line(this[index1]!.clone(), this[index2]!.clone())
+    for (
+      let index1 = 0, index2 = this.length - 1;
+      index1 < this.length;
+      index2 = index1++
+    )
+      yield new Line(this[index1]!.clone(), this[index2]!.clone())
   }
 
   public toRect(): Rect {
@@ -82,9 +86,17 @@ export default class Poly extends Array<Vector2> implements IPhysicsBody {
   }
 
   public getAxes(axes: Vector2[] = []) {
-    points: for (let index1 = 0, index2 = this.length - 1; index1 < this.length; index2 = index1++) {
-      const v = new Vector2(this[index1]!.y - this[index2]!.y, this[index2]!.x - this[index1]!.x).normalize()
-      for (let axeIndex = 0; axeIndex < axes.length; axeIndex++) if (v.equals(axes[axeIndex]!)) continue points
+    points: for (
+      let index1 = 0, index2 = this.length - 1;
+      index1 < this.length;
+      index2 = index1++
+    ) {
+      const v = new Vector2(
+        this[index1]!.y - this[index2]!.y,
+        this[index2]!.x - this[index1]!.x,
+      ).normalize()
+      for (let axeIndex = 0; axeIndex < axes.length; axeIndex++)
+        if (v.equals(axes[axeIndex]!)) continue points
       axes.push(v)
     }
     return axes

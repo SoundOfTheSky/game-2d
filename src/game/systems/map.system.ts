@@ -44,15 +44,15 @@ export type TyledObjectLayer = {
     height: number
     width: number
     ellipse?: boolean
-    polygon?: { x: number, y: number }[]
-    polyline?: [{ x: number, y: number }, { x: number, y: number }]
+    polygon?: { x: number; y: number }[]
+    polyline?: [{ x: number; y: number }, { x: number; y: number }]
   }[]
 }
 
 export default class MapSystem extends ECSSystem {
   declare public world: DefaultWorld
   public renderSystem
-  private _tiledDefinition!: TiledMap
+  protected _tiledDefinition!: TiledMap
 
   public get tiledDefinition(): TiledMap {
     return this._tiledDefinition
@@ -69,9 +69,7 @@ export default class MapSystem extends ECSSystem {
     this.createCollisionEntities()
   }
 
-  public constructor(
-    world: DefaultWorld,
-  ) {
+  public constructor(world: DefaultWorld) {
     super(world)
     this.renderSystem = this.world.systemMap.get(RenderSystem)!
   }
@@ -96,7 +94,7 @@ export default class MapSystem extends ECSSystem {
       for (let index = 0; index < layer.data.length; index++) {
         const id = layer.data[index]!
         if (id === 0) continue
-        const tileset = definition.tilesets.findLast(t => t.firstgid <= id)!
+        const tileset = definition.tilesets.findLast((t) => t.firstgid <= id)!
         const tId = id - tileset.firstgid
         context.drawImage(
           tileset.sourceFile,
@@ -131,9 +129,9 @@ export default class MapSystem extends ECSSystem {
 
   protected createCollisionEntities() {
     const layer = this.tiledDefinition.layers.find(
-      l => l.name === 'collision',
+      (l) => l.name === 'collision',
     ) as TyledObjectLayer
-    layer.objects.map(object => this.createHitboxEntity(object))
+    layer.objects.map((object) => this.createHitboxEntity(object))
     for (const body of this.renderSystem.border.toLines()) {
       const entity = new ECSEntity(this.world)
       new TransformComponent(entity)
@@ -144,17 +142,19 @@ export default class MapSystem extends ECSSystem {
     }
   }
 
-  protected createHitboxEntity(object: TyledObjectLayer['objects'][0], entity = new ECSEntity(this.world)) {
+  protected createHitboxEntity(
+    object: TyledObjectLayer['objects'][0],
+    entity = new ECSEntity(this.world),
+  ) {
     new TransformComponent(entity, {
       position: new Vector2(object.x, object.y),
     })
     let body: PhysicsBody
-    if (object.ellipse)
-      body = new Circle(new Vector2(), object.width / 2)
+    if (object.ellipse) body = new Circle(new Vector2(), object.width / 2)
     else if (object.polygon)
       body = new Poly(
         ...object.polygon.map(
-          p => new Vector2(object.x + p.x, object.y + p.y),
+          (p) => new Vector2(object.x + p.x, object.y + p.y),
         ),
       )
     else if (object.polyline)

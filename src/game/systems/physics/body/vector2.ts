@@ -32,8 +32,7 @@ export default class Vector2 implements IPhysicsBody {
     if (v instanceof Vector2) {
       this.x += v.x
       this.y += v.y
-    }
-    else {
+    } else {
       this.x += v
       this.y += v
     }
@@ -44,8 +43,7 @@ export default class Vector2 implements IPhysicsBody {
     if (v instanceof Vector2) {
       this.x -= v.x
       this.y -= v.y
-    }
-    else {
+    } else {
       this.x -= v
       this.y -= v
     }
@@ -56,8 +54,7 @@ export default class Vector2 implements IPhysicsBody {
     if (v instanceof Vector2) {
       this.x *= v.x
       this.y *= v.y
-    }
-    else {
+    } else {
       this.x *= v
       this.y *= v
     }
@@ -68,8 +65,7 @@ export default class Vector2 implements IPhysicsBody {
     if (v instanceof Vector2) {
       this.x /= v.x
       this.y /= v.y
-    }
-    else {
+    } else {
       this.x /= v
       this.y /= v
     }

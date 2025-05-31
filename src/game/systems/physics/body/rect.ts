@@ -58,27 +58,51 @@ export default class Rect implements IPhysicsBody {
   }
 
   public collisonVector(f: Vector2) {
-    if (f.y >= this.a.y && f.y <= this.b.y && f.x >= this.a.x && f.x <= this.b.x) {
+    if (
+      f.y >= this.a.y &&
+      f.y <= this.b.y &&
+      f.x >= this.a.x &&
+      f.x <= this.b.x
+    ) {
       const overlapX = f.x < this.a.x ? this.a.x - f.x : this.b.x - f.x
       const overlapY = f.y < this.a.y ? this.a.y - f.y : this.b.y - f.y
-      return Math.abs(overlapX) < Math.abs(overlapY) ? new Vector2(overlapX) : new Vector2(0, overlapY)
+      return Math.abs(overlapX) < Math.abs(overlapY)
+        ? new Vector2(overlapX)
+        : new Vector2(0, overlapY)
     }
   }
 
   public collisionRect(f: Rect) {
-    if (f.a.x <= this.b.x && f.a.y <= this.b.y && f.b.x >= this.a.x && f.b.y >= this.a.y) {
+    if (
+      f.a.x <= this.b.x &&
+      f.a.y <= this.b.y &&
+      f.b.x >= this.a.x &&
+      f.b.y >= this.a.y
+    ) {
       const overlapX = f.a.x < this.a.x ? this.a.x - f.b.x : this.b.x - f.a.x
       const overlapY = f.a.y < this.a.y ? this.a.y - f.b.y : this.b.y - f.a.y
-      return Math.abs(overlapX) < Math.abs(overlapY) ? new Vector2(overlapX) : new Vector2(0, overlapY)
+      return Math.abs(overlapX) < Math.abs(overlapY)
+        ? new Vector2(overlapX)
+        : new Vector2(0, overlapY)
     }
   }
 
   public intersectRect(f: Rect) {
-    return f.a.x <= this.b.x && f.a.y <= this.b.y && f.b.x >= this.a.x && f.b.y >= this.a.y
+    return (
+      f.a.x <= this.b.x &&
+      f.a.y <= this.b.y &&
+      f.b.x >= this.a.x &&
+      f.b.y >= this.a.y
+    )
   }
 
   public contains(f: Rect) {
-    return this.a.x <= f.a.x && this.b.x >= f.b.x && this.a.y <= f.a.y && this.b.y >= f.b.y
+    return (
+      this.a.x <= f.a.x &&
+      this.b.x >= f.b.x &&
+      this.a.y <= f.a.y &&
+      this.b.y >= f.b.y
+    )
   }
 
   public add(v: Vector2): this {
@@ -100,7 +124,12 @@ export default class Rect implements IPhysicsBody {
   }
 
   public toPoints() {
-    return [this.a.clone(), new Vector2(this.b.x, this.a.y), this.b.clone(), new Vector2(this.a.x, this.b.y)]
+    return [
+      this.a.clone(),
+      new Vector2(this.b.x, this.a.y),
+      this.b.clone(),
+      new Vector2(this.a.x, this.b.y),
+    ]
   }
 
   public toPoly() {
@@ -109,7 +138,12 @@ export default class Rect implements IPhysicsBody {
 
   public toLines() {
     const [a, b, c, d] = this.toPoints() as [Vector2, Vector2, Vector2, Vector2]
-    return [new Line(a, b.clone()), new Line(b, c.clone()), new Line(c, d.clone()), new Line(d, a.clone())] as const
+    return [
+      new Line(a, b.clone()),
+      new Line(b, c.clone()),
+      new Line(c, d.clone()),
+      new Line(d, a.clone()),
+    ] as const
   }
 
   public toRect(): Rect {
@@ -144,14 +178,19 @@ export default class Rect implements IPhysicsBody {
 
   public enlargedArea(rect: Rect) {
     return (
-      Math.max(this.b.x, rect.b.x)
-      - Math.min(this.a.x, rect.a.x) * Math.max(this.b.y, rect.b.y)
-      - Math.min(this.a.y, rect.a.y)
+      Math.max(this.b.x, rect.b.x) -
+      Math.min(this.a.x, rect.a.x) * Math.max(this.b.y, rect.b.y) -
+      Math.min(this.a.y, rect.a.y)
     )
   }
 
   public equals(rect: Rect) {
-    return this.a.x === rect.a.x && this.a.y === rect.a.y && this.b.x === rect.b.x && this.b.y === rect.b.y
+    return (
+      this.a.x === rect.a.x &&
+      this.a.y === rect.a.y &&
+      this.b.x === rect.b.x &&
+      this.b.y === rect.b.y
+    )
   }
 
   public toString() {

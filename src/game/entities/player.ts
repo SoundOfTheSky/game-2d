@@ -1,19 +1,23 @@
 import { AnimationComponent } from '../components/animated.component'
 import { HitboxComponent } from '../components/hitbox.component'
+import { HPComponent } from '../components/hp.component'
 import { InputComponent } from '../components/input.component'
 import { TransformComponent } from '../components/transform.component'
 import { VelocityComponent } from '../components/velocity.component'
 import ECSEntity from '../ecs/entity'
 import DashAbility from '../systems/abilities/dash.ability'
 import { generateAnimation } from '../systems/animation.system'
+import { Key } from '../systems/input.system'
 import Circle from '../systems/physics/body/circle'
 import Vector2 from '../systems/physics/body/vector2'
-import { camFollowTag } from '../systems/render.system'
 import DefaultWorld from '../worlds/default.world'
 
-export default function createPlayer(world: DefaultWorld, options: {
-  position?: Vector2
-} = {}) {
+export default function createPlayer(
+  world: DefaultWorld,
+  options: {
+    position?: Vector2
+  } = {},
+) {
   const entity = new ECSEntity(world)
   new TransformComponent(entity, {
     position: options.position,
@@ -46,20 +50,24 @@ export default function createPlayer(world: DefaultWorld, options: {
   new HitboxComponent(entity, {
     body: new Circle(new Vector2(16, 24), 8),
     types: new Set(['player']),
-    onCollide(myHitbox, otherHitbox, separetionVector) {
-      if (otherHitbox.data.types.has('geometry')) {
-        const tC = myHitbox.entity.components.get(TransformComponent)!
-        tC.data.position.subtract(separetionVector)
-      }
+    onCollide(myHitbox, otherHitbox, separationVector) {
+      if (otherHitbox.data.types.has('geometry'))
+        myHitbox.entity.components
+          .get(TransformComponent)!
+          .data.position.subtract(separationVector)
     },
   })
   new InputComponent(entity, {
-    move: true,
-    actions: {
-      move: new DashAbility(entity),
-    },
+    moveToVelocity: true,
+    abilities: new Map([[Key.MOVE, new DashAbility(entity)]]),
   })
-  entity.addTag(camFollowTag)
+  entity.addTag('camFollow')
+  new HPComponent(entity, {
+    hp: 100,
+    maxHP: 100,
+    regen: 0.05, // 2 sec
+    regenCooldown: 2000, // 2 sec
+  })
   entity.addTag('debug')
   return entity
 }

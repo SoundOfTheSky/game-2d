@@ -1,24 +1,29 @@
-import ECSComponent from '@/game/ecs/component'
+import { removeFromArray } from '@softsky/utils'
 
-import ECSEntity from '../ecs/entity'
+import ECSComponent from '@/game/ecs/component'
 
 export class EffectsComponent extends ECSComponent<Effect[]> {}
 
 export class Effect {
   public startTime
-  protected effectsComponent
 
-  public constructor(public entity: ECSEntity, public duration: number) {
-    this.startTime = entity.world.time
-    this.effectsComponent = entity.components.get(EffectsComponent) ?? new EffectsComponent(entity, [])
+  public constructor(
+    protected effectsComponent: EffectsComponent,
+    public duration: number,
+  ) {
+    this.startTime = this.effectsComponent.entity.world.time
     this.effectsComponent.data.push(this)
   }
 
-  public update() {
-    if (this.entity.world.time > this.startTime + this.duration) this.destroy()
+  public tick() {
+    if (
+      this.effectsComponent.entity.world.time >
+      this.startTime + this.duration
+    )
+      this.destroy()
   }
 
   public destroy() {
-    this.effectsComponent.data.splice(this.effectsComponent.data.indexOf(this), 1)
+    removeFromArray(this.effectsComponent.data, this)
   }
 }

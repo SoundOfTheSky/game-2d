@@ -1,4 +1,4 @@
-import { Constructor } from '@softsky/utils'
+import { Constructor, pushToSorted, removeFromArray } from '@softsky/utils'
 
 import ECSWorld from './world'
 
@@ -9,24 +9,36 @@ import ECSWorld from './world'
 export class ECSSystem {
   /** Bigger the priority, sooner it will be called */
   public priority = 0
+  protected runOnDestroy: (() => unknown)[] = []
 
-  public constructor(
-    public world: ECSWorld,
-  ) {
-    let index = this.world.systems.findIndex(x => x.priority < this.priority)
-    if (index === -1) index = this.world.systems.length
-    this.world.systems.splice(index, 0, this)
+  public constructor(public world: ECSWorld) {
+    pushToSorted(this.world.systems, this, (x) => x.priority < this.priority)
     this.world.systemMap.set(this.constructor as Constructor<ECSSystem>, this)
   }
 
   /** Function that will be called every tick */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public update(): void {};
+
+  public tick(): void {}
 
   public destroy() {
-    const index = this.world.systems.indexOf(this)
-    if (index === -1) this.world.systems.splice(index, 1)
+    removeFromArray(this.world.systems, this)
     this.world.systemMap.delete(this.constructor as Constructor<ECSSystem>)
+    for (let index = 0; index < this.runOnDestroy.length; index++)
+      this.runOnDestroy[index]!()
+  }
+
+  protected registerEvent(
+    target: EventTarget,
+    name: string,
+    function_: (event: Event) => unknown,
+    passive = true,
+  ) {
+    target.addEventListener(name, function_, {
+      passive,
+    })
+    this.runOnDestroy.push(() => {
+      target.removeEventListener(name, function_)
+    })
   }
 }
 
@@ -34,13 +46,12 @@ export class ECSFixedUpdateSystem extends ECSSystem {
   public leftoverTime = 0
   public timeBetweenUpdates = 16.6
 
-  public update(): void {
+  public tick(): void {
     const accumulatedTime = this.leftoverTime + this.world.deltaTime
     const steps = accumulatedTime / this.timeBetweenUpdates
-    this.leftoverTime = accumulatedTime - (steps * this.timeBetweenUpdates)
+    this.leftoverTime = accumulatedTime - steps * this.timeBetweenUpdates
     for (let step = 0; step < steps; step++) this.fixedUpdate()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public fixedUpdate(): void {}
 }

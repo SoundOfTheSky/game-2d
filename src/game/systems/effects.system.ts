@@ -4,7 +4,7 @@ import { ECSSystem } from '../ecs/system'
 import DefaultWorld from '../worlds/default.world'
 
 export default class EffectsSystem extends ECSSystem {
-  public declare world: DefaultWorld
+  declare public world: DefaultWorld
   public queue
 
   public constructor(world: DefaultWorld) {
@@ -12,11 +12,11 @@ export default class EffectsSystem extends ECSSystem {
     this.queue = new ECSQuery(world, [EffectsComponent])
   }
 
-  public update(): void {
+  public tick(): void {
     for (const entity of this.queue.matches) {
       const effectsComponent = entity.components.get(EffectsComponent)!
       for (let index = 0; index < effectsComponent.data.length; index++)
-        effectsComponent.data[index]!.update()
+        effectsComponent.data[index]!.tick()
     }
   }
 }

@@ -1,4 +1,7 @@
-import { AnimationComponent, AnimationFrame } from '../components/animated.component'
+import {
+  AnimationComponent,
+  AnimationFrame,
+} from '../components/animated.component'
 import { RenderableComponent } from '../components/renderable.component'
 import { ECSQuery } from '../ecs/query'
 import { ECSSystem } from '../ecs/system'
@@ -7,7 +10,7 @@ import DefaultWorld from '../worlds/default.world'
 import Vector2 from './physics/body/vector2'
 
 export class AnimationSystem extends ECSSystem {
-  public declare world: DefaultWorld
+  declare public world: DefaultWorld
   public queue
 
   public constructor(world: DefaultWorld) {
@@ -15,12 +18,12 @@ export class AnimationSystem extends ECSSystem {
     this.queue = new ECSQuery(world, [AnimationComponent])
   }
 
-  public update(): void {
+  public tick(): void {
     for (const entity of this.queue.matches) {
       const animatedComponent = entity.components.get(AnimationComponent)!
-      const renderableComponent
-        = entity.components.get(RenderableComponent)
-        ?? new RenderableComponent(entity, {
+      const renderableComponent =
+        entity.components.get(RenderableComponent) ??
+        new RenderableComponent(entity, {
           source: animatedComponent.data.frames[0]!.source!,
           offset: animatedComponent.data.frames[0]!.offset,
           size: animatedComponent.data.frames[0]!.size,
@@ -28,30 +31,31 @@ export class AnimationSystem extends ECSSystem {
       let changed = !animatedComponent.data.lastFrameChange
       let timeSinceLastChange = 0
       if (animatedComponent.data.lastFrameChange) {
-        timeSinceLastChange = this.world.time - animatedComponent.data.lastFrameChange
+        timeSinceLastChange =
+          this.world.time - animatedComponent.data.lastFrameChange
         while (true) {
-          const { time }
-          = animatedComponent.data.frames[animatedComponent.data.frame]!
+          const { time } =
+            animatedComponent.data.frames[animatedComponent.data.frame]!
           if (!time) break
           timeSinceLastChange -= time / animatedComponent.data.speed
           // console.log(animatedComponent.data.frame, time, timeSinceLastChange)
           if (timeSinceLastChange <= 0) break
           if (
-            ++animatedComponent.data.frame
-            === animatedComponent.data.frames.length
+            ++animatedComponent.data.frame ===
+            animatedComponent.data.frames.length
           )
             animatedComponent.data.frame = 0
           changed = true
         }
       }
       if (changed) {
-        const frame
-          = animatedComponent.data.frames[animatedComponent.data.frame]!
+        const frame =
+          animatedComponent.data.frames[animatedComponent.data.frame]!
         frame.onDraw?.()
-        animatedComponent.data.lastFrameChange
-          = this.world.time
-          - (frame.time ?? 0) / animatedComponent.data.speed
-          - timeSinceLastChange
+        animatedComponent.data.lastFrameChange =
+          this.world.time -
+          (frame.time ?? 0) / animatedComponent.data.speed -
+          timeSinceLastChange
         Object.assign(renderableComponent.data, frame)
       }
     }

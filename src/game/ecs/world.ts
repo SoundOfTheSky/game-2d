@@ -1,18 +1,31 @@
-import { Constructor } from '@softsky/utils'
+import { Base, Constructor } from '@softsky/utils'
 
-import ECSComponent from './component'
-import ECSEntity from './entity'
+import ECSEntity, { ECSEntityExport } from './entity'
 import { ECSComponentFilter, ECSQuery } from './query'
 import { ECSSystem } from './system'
 
-export default class ECSWorld {
-  public static lastId = 0
-
-  public id = ++ECSComponent.lastId
+/**
+ * Base of ECS system. All your components, systems, queries and entities will be registered to it.
+ * Worlds can't share state, but you can create sub world.
+ *
+ * I recommend using worlds for every set of systems that you have.
+ * For example, you techincally can control time speed in a subworld.
+ * This way you can create a UI world that has game world in it,
+ * and if menu is open, you stop time in your game world, but still tick UI.
+ *
+ * Tick order:
+ * 1. beforeNextQueueUpdate
+ * 2. Queues are updated
+ * 3. onNextTick
+ * 4. systems tick
+ * 5. generator systems tick
+ */
+export default class ECSWorld extends Base {
+  public beforeNextQueueUpdate: (() => unknown)[] = []
+  public onNextTick: (() => unknown)[] = []
   public entities: ECSEntity[] = []
   public systems: ECSSystem[] = []
   public queries: ECSQuery[] = []
-  public onNextFrame: (() => unknown)[] = []
   public queueUpdates = new Map<ECSEntity, ECSComponentFilter[] | undefined>()
   public time = 0
   public deltaTime = 0
@@ -21,9 +34,10 @@ export default class ECSWorld {
     get<T extends ECSSystem>(key: Constructor<T>): T | undefined
   } = new Map()
 
-  public update(time: number) {
+  public tick(time: number) {
     this.deltaTime = time - this.time
     this.time = time
+
     // Clear added and deleted properties of queries
     for (let index = 0; index < this.queries.length; index++) {
       const query = this.queries[index]!
@@ -31,17 +45,27 @@ export default class ECSWorld {
       query.deleted.clear()
     }
 
-    // Process next tick subscriptions
-    for (let index = 0; index < this.onNextFrame.length; index++)
-      this.onNextFrame[index]!()
-    this.onNextFrame.length = 0
+    // Process beforeNextQueueUpdate subscriptions
+    for (let index = 0; index < this.beforeNextQueueUpdate.length; index++)
+      this.beforeNextQueueUpdate[index]!()
+    this.beforeNextQueueUpdate.length = 0
 
     // Update queries with entities
-    if (this.queueUpdates.size > 0) this.updateEntitiesInQueries()
+    if (this.queueUpdates.size !== 0) {
+      for (const [entity, components] of this.queueUpdates)
+        for (let index = 0; index < this.queries.length; index++)
+          this.queries[index]!.updateEntity(entity, components)
+      this.queueUpdates.clear()
+    }
+
+    // Process onNextTick subscriptions
+    for (let index = 0; index < this.onNextTick.length; index++)
+      this.onNextTick[index]!()
+    this.onNextTick.length = 0
 
     // System update
     for (let index = 0; index < this.systems.length; index++)
-      this.systems[index]!.update()
+      this.systems[index]!.tick()
 
     // Generator systems update
     for (let index = 0; index < this.generatorSystem.length; index++)
@@ -49,33 +73,32 @@ export default class ECSWorld {
         this.generatorSystem.splice(index--, 1)
   }
 
-  private updateEntitiesInQueries() {
-    for (const [entity, components] of this.queueUpdates) {
-      for (let index = 0; index < this.queries.length; index++) {
-        const query = this.queries[index]!
-        if (components)
-          for (let index = 0; index < components.length; index++) {
-            if (query.subscriptions.has(components[index]!)) {
-              const has = query.matches.has(entity)
-              if (query.checkEntity(entity)) {
-                if (!has) {
-                  query.matches.add(entity)
-                  query.added.add(entity)
-                }
-              }
-              else if (has) {
-                query.matches.delete(entity)
-                query.deleted.add(entity)
-              }
-              break
-            }
-          }
-        else {
-          query.matches.delete(entity)
-          query.deleted.add(entity)
-        }
-      }
+  public saveEntities(): ECSEntityExport[] {
+    return this.entities.map((x) => x.toJSON())
+  }
+
+  public loadEntities(data: ECSEntityExport[]) {
+    for (let index = 0; index < this.entities.length; index++) {
+      const entity = this.entities[index]!
+      this.queueUpdates.set(entity, undefined)
+      ECSEntity.idMap.delete(entity.id)
     }
-    this.queueUpdates.clear()
+    this.entities.length = 0
+    for (let index = 0; index < data.length; index++) {
+      const entityData = data[index]!
+      ;(Base.subclasses.get(entityData.className) as typeof ECSEntity).fromJSON(
+        this,
+        entityData,
+      )
+    }
+  }
+
+  /** Automatically called on changes to queue */
+  public addQueueChange(entity: ECSEntity, changes?: ECSComponentFilter[]) {
+    if (changes) {
+      const update = this.queueUpdates.get(entity)
+      if (update) update.push(...changes)
+      else this.queueUpdates.set(entity, changes)
+    } else this.queueUpdates.set(entity, undefined)
   }
 }

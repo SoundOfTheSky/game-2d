@@ -11,7 +11,10 @@ export type TransformComponentData = {
   rotation?: number
 }
 export class TransformComponent extends ECSComponent<TransformComponentData> {
-  public constructor(entity: ECSEntity, data: Partial<TransformComponentData> = {}) {
+  public constructor(
+    entity: ECSEntity,
+    data: Partial<TransformComponentData> = {},
+  ) {
     data.position ??= new Vector2()
     super(entity, data as TransformComponentData)
   }

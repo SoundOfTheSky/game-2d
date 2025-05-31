@@ -19,17 +19,23 @@ export class Ability {
   // ===
 
   public constructor(public entity: ECSEntity) {
-    this.abilitiesComponent = entity.components.get(AbilitiesComponent) ?? new AbilitiesComponent(entity, [])
+    this.abilitiesComponent =
+      entity.components.get(AbilitiesComponent) ??
+      new AbilitiesComponent(entity, [])
     this.abilitiesComponent.data.push(this)
   }
 
   public destroy() {
-    this.abilitiesComponent.data.splice(this.abilitiesComponent.data.indexOf(this), 1)
+    this.abilitiesComponent.data.splice(
+      this.abilitiesComponent.data.indexOf(this),
+      1,
+    )
   }
 
   public canExecute() {
     if (this.executing) return false
-    const deltaTime = this.abilitiesComponent.entity.world.time - this.lastExecutionTime
+    const deltaTime =
+      this.abilitiesComponent.entity.world.time - this.lastExecutionTime
     if (this.cooldown && deltaTime < this.cooldown) return false
     let uses = this.uses
     if (uses !== undefined) {
@@ -51,9 +57,12 @@ export class Ability {
     return true
   }
 
-  public update() {
-    if (!this.duration
-      || this.lastExecutionTime + this.duration < this.abilitiesComponent.entity.world.time) {
+  public tick() {
+    if (
+      this.duration &&
+      this.lastExecutionTime + this.duration <
+        this.abilitiesComponent.entity.world.time
+    ) {
       this.stop()
       return false
     }

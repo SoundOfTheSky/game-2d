@@ -68,12 +68,16 @@ export default class Line implements IPhysicsBody {
   }
 
   public splitWithPoint(v: Vector2) {
-    return [new Line(this.a.clone(), v.clone()), new Line(v.clone(), this.b.clone())] as const
+    return [
+      new Line(this.a.clone(), v.clone()),
+      new Line(v.clone(), this.b.clone()),
+    ] as const
   }
 
   public collision(f: PhysicsBody): Vector2 | undefined {
     if (f instanceof Vector2) {
-      if (this.a.distance(f) + this.b.distance(f) === this.getDistance()) new Vector2(f.x + 1, f.y + 1)
+      if (this.a.distance(f) + this.b.distance(f) === this.getDistance())
+        new Vector2(f.x + 1, f.y + 1)
       return
     }
     if (f instanceof Line) return this.toPoly().collision(f.toPoly())
@@ -83,6 +87,7 @@ export default class Line implements IPhysicsBody {
   public toRect(): Rect {
     return new Rect(
       new Vector2(Math.min(this.a.x, this.b.x), Math.min(this.a.y, this.b.y)),
-      new Vector2(Math.max(this.a.x, this.b.x), Math.max(this.a.y, this.b.y)))
+      new Vector2(Math.max(this.a.x, this.b.x), Math.max(this.a.y, this.b.y)),
+    )
   }
 }

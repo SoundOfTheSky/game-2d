@@ -15,11 +15,14 @@ export default class RTree {
     if (item instanceof Rect) {
       this.rect = item
       this.children = []
-    }
-    else {
-      this.rect = new Rect(new Vector2(Infinity, Infinity), new Vector2(-Infinity, -Infinity))
+    } else {
+      this.rect = new Rect(
+        new Vector2(Infinity, Infinity),
+        new Vector2(-Infinity, -Infinity),
+      )
       this.children = item
-      for (let index = 0; index < this.children.length; index++) this.children[index]!.parent = this
+      for (let index = 0; index < this.children.length; index++)
+        this.children[index]!.parent = this
       this.updateRect(true)
     }
   }
@@ -39,8 +42,7 @@ export default class RTree {
     if (node.children.length > node.max) {
       node.split()
       node.updateRect()
-    }
-    else
+    } else
       while (node) {
         node.rect.extend(rect)
         node = node.parent
@@ -50,7 +52,7 @@ export default class RTree {
   public search(rect: Rect, result: RTree[] = []): RTree[] {
     if (!rect.intersectRect(this.rect)) return result
     const stack: RTree[] = [this]
-    while (stack.length > 0) {
+    while (stack.length !== 0) {
       const node = stack.pop()!
       for (let index = 0; index < node.children.length; index++) {
         const child = node.children[index]!
@@ -74,15 +76,19 @@ export default class RTree {
 
   public all(result: RTree[] = []): RTree[] {
     const stack: RTree[] = [this]
-    while (stack.length > 0) {
+    while (stack.length !== 0) {
       const node = stack.pop()!
-      if (node.leaf) for (let index = 0; index < node.children.length; index++) result.push(node.children[index]!)
-      else for (let index = 0; index < node.children.length; index++) stack.push(node.children[index]!)
+      if (node.leaf)
+        for (let index = 0; index < node.children.length; index++)
+          result.push(node.children[index]!)
+      else
+        for (let index = 0; index < node.children.length; index++)
+          stack.push(node.children[index]!)
     }
     return result
   }
 
-  private chooseSubtree(rect: Rect) {
+  protected chooseSubtree(rect: Rect) {
     // eslint-disable-next-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
     let node: RTree = this
     while (!node.leaf) {
@@ -97,8 +103,7 @@ export default class RTree {
           if (area < minArea) minArea = area
           minEnlargement = enlargement
           best = child
-        }
-        else if (enlargement === minEnlargement && area < minArea) {
+        } else if (enlargement === minEnlargement && area < minArea) {
           minArea = area
           best = child
         }
@@ -108,43 +113,66 @@ export default class RTree {
     return node
   }
 
-  private split() {
+  protected split() {
     this.sortBySmallestMarginAxis()
     const splitIndex = this.chooseSplitIndex()
     if (this.parent) {
-      const newNode = new RTree(this.children.splice(splitIndex), this.max, this.min, this.leaf, this.parent)
+      const newNode = new RTree(
+        this.children.splice(splitIndex),
+        this.max,
+        this.min,
+        this.leaf,
+        this.parent,
+      )
       this.parent.leaf = false
       this.parent.children.push(newNode)
       this.updateRect()
       if (this.parent.children.length > this.parent.max) this.parent.split()
-    }
-    else {
-      const leftNode = new RTree(this.children.slice(0, splitIndex), this.max, this.min, this.leaf, this)
-      const rightNode = new RTree(this.children.slice(splitIndex), this.max, this.min, this.leaf, this)
+    } else {
+      const leftNode = new RTree(
+        this.children.slice(0, splitIndex),
+        this.max,
+        this.min,
+        this.leaf,
+        this,
+      )
+      const rightNode = new RTree(
+        this.children.slice(splitIndex),
+        this.max,
+        this.min,
+        this.leaf,
+        this,
+      )
       this.leaf = false
       this.children = [leftNode, rightNode]
       this.updateRect()
     }
   }
 
-  private chooseSplitIndex() {
+  protected chooseSplitIndex() {
     let index = this.children.length - this.min
     let minOverlap = Infinity
     let minArea = Infinity
-    const leftRect = new Rect(new Vector2(Infinity, Infinity), new Vector2(-Infinity, -Infinity))
+    const leftRect = new Rect(
+      new Vector2(Infinity, Infinity),
+      new Vector2(-Infinity, -Infinity),
+    )
     for (let index1 = 1; index1 <= this.children.length - this.min; index1++) {
       leftRect.extend(this.children[index1 - 1]!.rect)
       if (index1 < this.min) continue
-      const rightRect = new Rect(new Vector2(Infinity, Infinity), new Vector2(-Infinity, -Infinity))
-      for (let index2 = index1; index2 < this.children.length; index2++) rightRect.extend(this.children[index2]!.rect)
+      const rightRect = new Rect(
+        new Vector2(Infinity, Infinity),
+        new Vector2(-Infinity, -Infinity),
+      )
+      for (let index2 = index1; index2 < this.children.length; index2++)
+        rightRect.extend(this.children[index2]!.rect)
       const overlap = leftRect.intersection(rightRect)?.area() ?? 0
       const area = leftRect.area() + rightRect.area()
       if (overlap < minOverlap) {
         if (area < minArea) minArea = area
         minOverlap = overlap
         index = index1
-      }
-      else if (overlap === minOverlap && area < minArea) {
+      } else if (overlap === minOverlap && area < minArea) {
         minArea = area
         index = index1
       }
@@ -152,7 +180,7 @@ export default class RTree {
     return index
   }
 
-  private sortBySmallestMarginAxis() {
+  protected sortBySmallestMarginAxis() {
     const xSorted = [...this.children.sort(sortByMinX)]
     const xMargin = this.margin()
     this.children.sort(sortByMinY)
@@ -160,30 +188,38 @@ export default class RTree {
     if (xMargin < yMargin) this.children = xSorted
   }
 
-  private margin() {
+  protected margin() {
     let margin = 0
-    const leftRect = new Rect(new Vector2(Infinity, Infinity), new Vector2(-Infinity, -Infinity))
-    const rightRect = new Rect(new Vector2(Infinity, Infinity), new Vector2(-Infinity, -Infinity))
+    const leftRect = new Rect(
+      new Vector2(Infinity, Infinity),
+      new Vector2(-Infinity, -Infinity),
+    )
+    const rightRect = new Rect(
+      new Vector2(Infinity, Infinity),
+      new Vector2(-Infinity, -Infinity),
+    )
     for (let index = 0; index < this.children.length - this.min; index++) {
       leftRect.extend(this.children[index]!.rect)
       rightRect.extend(this.children[this.children.length - index - 1]!.rect)
-      if (index >= this.min - 1) margin += leftRect.margin() + rightRect.margin()
+      if (index >= this.min - 1)
+        margin += leftRect.margin() + rightRect.margin()
     }
     return margin
   }
 
-  private updateRect(noPropagation?: boolean) {
+  protected updateRect(noPropagation?: boolean) {
     this.rect.a.x = Infinity
     this.rect.a.y = Infinity
     this.rect.b.x = -Infinity
     this.rect.b.y = -Infinity
-    for (let index = 0; index < this.children.length; index++) this.rect.extend(this.children[index]!.rect)
+    for (let index = 0; index < this.children.length; index++)
+      this.rect.extend(this.children[index]!.rect)
     if (!noPropagation) this.parent?.updateRect()
   }
 
   public remove(rect: Rect) {
     const stack: RTree[] = [this]
-    while (stack.length > 0) {
+    while (stack.length !== 0) {
       const node = stack.pop()!
       if (node.leaf) {
         for (let index = 0; index < node.children.length; index++)
@@ -192,21 +228,21 @@ export default class RTree {
             node.condense()
             return this
           }
-      }
-      else for (let index = 0; index < node.children.length; index++) stack.push(node.children[index]!)
+      } else
+        for (let index = 0; index < node.children.length; index++)
+          stack.push(node.children[index]!)
     }
     return this
   }
 
-  private condense() {
+  protected condense() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias, unicorn/no-this-assignment
     let node: RTree = this
     while (true) {
       if (node.children.length === 0 && node.parent) {
         node.parent.children.splice(node.parent.children.indexOf(node), 1)
         node = node.parent
-      }
-      else {
+      } else {
         node.updateRect()
         break
       }

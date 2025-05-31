@@ -6,28 +6,9 @@ export default [
   ...skyEslintConfig,
   {
     rules: {
-      '@typescript-eslint/no-unnecessary-condition': [
-        2,
-        {
-          allowConstantLoopConditions: true,
-        },
-      ],
-      '@typescript-eslint/no-unused-vars': [
-        1,
-        {
-          args: 'all',
-          argsIgnorePattern: '^_',
-          caughtErrors: 'all',
-          caughtErrorsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        },
-      ],
-      '@typescript-eslint/no-explicit-any': 0,
-      'unicorn/expiring-todo-comments': 0,
-      'unicorn/prefer-modern-math-apis': 0, // Bruh, "modern" math apis are slow af
-      'prefer-math-min-max': 0, // Tenary is faster
-    },
-  },
+      'unicorn/explicit-length-check': 0,
+      '@typescript-eslint/no-unsafe-assignment': 0, // Any is used sparingly
+      '@typescript-eslint/no-empty-function': 0,
+    }
+  }
 ]
