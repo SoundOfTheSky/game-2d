@@ -55,7 +55,7 @@ export default class ECSEntityPool {
   }
 
   public clear(min: number) {
-    const entities = this.entities.splice(min + 1, Infinity)
+    const entities = this.entities.splice(min + 1)
     for (let index = 0; index < entities.length; index++)
       ECSEntity.idMap.delete(entities[index]!.id)
   }

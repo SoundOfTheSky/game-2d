@@ -1,7 +1,7 @@
-import ECSComponent from '@/game/ecs/component'
+import ECSComponent from '@/ecs/component'
 
-import ECSEntity from '../ecs/entity'
-import Vector2 from '../systems/physics/body/vector2'
+import ECSEntity from '../../ecs/entity'
+import Vector2 from '../../physics/body/vector2'
 
 import { ParentComponent } from './parent.component'
 

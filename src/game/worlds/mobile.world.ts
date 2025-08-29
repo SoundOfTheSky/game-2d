@@ -1,4 +1,4 @@
-import ECSWorld from '@/game/ecs/world'
+import ECSWorld from '@/ecs/world'
 
 import { AnimationSystem } from '../systems/animation.system'
 import DebugSystem from '../systems/debug.system'

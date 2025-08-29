@@ -1,17 +1,17 @@
 import { HitboxComponent } from '../components/hitbox.component'
 import { RenderableComponent } from '../components/renderable.component'
 import { TransformComponent } from '../components/transform.component'
-import ECSEntity from '../ecs/entity'
-import { ECSSystem } from '../ecs/system'
+import ECSEntity from '../../ecs/entity'
+import { ECSSystem } from '../../ecs/system'
 import { initCanvas } from '../utils/canvas'
 import DefaultWorld from '../worlds/default.world'
 
-import { PhysicsBody } from './physics/body'
-import Circle from './physics/body/circle'
-import Line from './physics/body/line'
-import Poly from './physics/body/poly'
-import Rect from './physics/body/rect'
-import Vector2 from './physics/body/vector2'
+import { PhysicsBody } from '../../physics/body'
+import Circle from '../../physics/body/circle'
+import Line from '../../physics/body/line'
+import Poly from '../../physics/body/poly'
+import Rect from '../../physics/body/rect'
+import Vector2 from '../../physics/body/vector2'
 import { RenderSystem } from './render.system'
 
 export type TiledMap = {
@@ -88,7 +88,8 @@ export default class MapSystem extends ECSSystem {
       new RenderableComponent(entity, {
         source: canvas,
         size: new Vector2(width, height),
-        order: index < 3 ? 0 : height,
+        // Render first 3 layers on background, all next layer topmost
+        priority: index < 3 ? height : 0,
       })
       const { context } = initCanvas(canvas, width, height)
       for (let index = 0; index < layer.data.length; index++) {

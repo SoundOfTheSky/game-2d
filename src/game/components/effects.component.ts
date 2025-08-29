@@ -1,6 +1,6 @@
 import { removeFromArray } from '@softsky/utils'
 
-import ECSComponent from '@/game/ecs/component'
+import ECSComponent from '@/ecs/component'
 
 export class EffectsComponent extends ECSComponent<Effect[]> {}
 

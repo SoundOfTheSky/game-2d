@@ -1,4 +1,5 @@
-import ECSWorld from './ecs/world'
+import ECSWorld from '../ecs/world'
+
 import { initCanvas } from './utils/canvas'
 import { loadImage } from './utils/files'
 
@@ -34,7 +35,7 @@ export default class Game {
   protected async preloadResources(resources: string[]) {
     const loaded = await Promise.all(
       resources.map((file) =>
-        file.endsWith('.png') || file.endsWith('.webp')
+        file.endsWith('.webp')
           ? loadImage(file)
           : fetch(file).then((x) => x.text()),
       ),

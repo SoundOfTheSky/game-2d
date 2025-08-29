@@ -1,14 +1,13 @@
-import ECSWorld from '@/game/ecs/world'
+import ECSWorld from '@/ecs/world'
 
 import Rodosskaya from '../maps/rodosskaya'
 import AbilitiesSystem from '../systems/abilities/abilities.system'
 import { AnimationSystem } from '../systems/animation.system'
 import DestroySystem from '../systems/destroy.system'
-import HPSystem from '../systems/hp.system'
 import { InputSystem } from '../systems/input.system'
 import MapSystem from '../systems/map.system'
 import ParentSystem from '../systems/parent.system'
-import PhysicsSystem from '../systems/physics/physics.system'
+import PhysicsSystem from '../systems/physics.system'
 import { RenderSystem } from '../systems/render.system'
 import TransformSystem from '../systems/transform.system'
 import TriggerAnimationSystem from '../systems/trigger-animation.system'
@@ -38,7 +37,7 @@ export default class DefaultWorld extends ECSWorld {
     new AbilitiesSystem(this)
     new DestroySystem(this)
     // new DebugSystem(this)
-    new HPSystem(this)
+    // new HPSystem(this)
 
     // === Map ===
     new Rodosskaya(this)

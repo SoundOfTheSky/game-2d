@@ -1,12 +1,13 @@
+import { ECSQuery } from '../../ecs/query'
+import { ECSSystem } from '../../ecs/system'
 import { AnimationComponent } from '../components/animated.component'
 import {
   getDirectionStringFromVector2,
   VelocityComponent,
 } from '../components/velocity.component'
-import { ECSQuery } from '../ecs/query'
-import { ECSSystem } from '../ecs/system'
 import DefaultWorld from '../worlds/default.world'
 
+/** System that triggers animations  */
 export default class TriggerAnimationSystem extends ECSSystem {
   declare public world: DefaultWorld
   public moveAnimation$

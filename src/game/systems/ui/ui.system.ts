@@ -1,4 +1,4 @@
-import { ECSSystem } from '../../ecs/system'
+import { ECSSystem } from '../../../ecs/system'
 import DefaultWorld from '../../worlds/default.world'
 
 export default class UISystem extends ECSSystem {

@@ -1,4 +1,4 @@
-import ECSComponent from '@/game/ecs/component'
+import ECSComponent from '@/ecs/component'
 
 export type HPComponentData = {
   hp: number

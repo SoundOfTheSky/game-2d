@@ -12,7 +12,7 @@ export class ECSSystem {
   protected runOnDestroy: (() => unknown)[] = []
 
   public constructor(public world: ECSWorld) {
-    pushToSorted(this.world.systems, this, (x) => x.priority < this.priority)
+    pushToSorted(this.world.systems, this, (x) => this.priority - x.priority)
     this.world.systemMap.set(this.constructor as Constructor<ECSSystem>, this)
   }
 

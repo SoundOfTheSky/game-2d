@@ -1,8 +1,8 @@
 import { Optional } from '@softsky/utils'
 
-import ECSComponent from '@/game/ecs/component'
+import ECSComponent from '@/ecs/component'
 
-import ECSEntity from '../ecs/entity'
+import ECSEntity from '../../ecs/entity'
 
 import { Renderable } from './renderable.component'
 

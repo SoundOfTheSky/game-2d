@@ -85,6 +85,14 @@ export default class Vector2 implements IPhysicsBody {
     return Math.sqrt(this.x * this.x + this.y * this.y)
   }
 
+  public angle(v?: Vector2, radian?: boolean) {
+    const angle = v
+      ? Math.atan2(this.x * v.y - this.y * v.x, this.x * v.x + this.y * v.y)
+      : Math.atan2(this.y, this.x)
+    if (radian) return angle
+    return (angle * 180) / Math.PI
+  }
+
   public collision(f: PhysicsBody): Vector2 | undefined {
     if (f instanceof Vector2) {
       if (f.x === this.x && f.y === this.y) new Vector2(this.x + 1, this.y)
@@ -100,8 +108,8 @@ export default class Vector2 implements IPhysicsBody {
   public normalize(onlyDecrease?: boolean, maxDistance = 1): this {
     const d = this.distance()
     if (onlyDecrease ? d > maxDistance : d !== 0) {
-      this.x /= d / maxDistance
-      this.y /= d / maxDistance
+      this.x *= maxDistance / d
+      this.y *= maxDistance / d
     }
     return this
   }

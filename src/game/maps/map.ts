@@ -1,6 +1,6 @@
-import createPlayer from '../entities/player'
+import createPlayer from '../entities/player.entity'
 import MapSystem, { TiledMap, TyledObjectLayer } from '../systems/map.system'
-import Vector2 from '../systems/physics/body/vector2'
+import Vector2 from '../../physics/body/vector2'
 import DefaultWorld from '../worlds/default.world'
 
 export default class Map {

@@ -1,5 +1,5 @@
-import { ECSQuery } from '../ecs/query'
-import { ECSSystem } from '../ecs/system'
+import { ECSQuery } from '../../ecs/query'
+import { ECSSystem } from '../../ecs/system'
 import DefaultWorld from '../worlds/default.world'
 
 export default class DebugSystem extends ECSSystem {

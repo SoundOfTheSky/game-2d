@@ -1,15 +1,15 @@
 import { Optional } from '@softsky/utils'
 
-import ECSComponent from '@/game/ecs/component'
+import ECSComponent from '@/ecs/component'
 
-import ECSEntity from '../ecs/entity'
-import Vector2 from '../systems/physics/body/vector2'
+import ECSEntity from '../../ecs/entity'
+import Vector2 from '../../physics/body/vector2'
 
 export type Renderable = {
   source: CanvasImageSource
   size: Vector2
   opacity?: number
-  order?: number
+  priority?: number
   offset?: Vector2
 }
 /** Requires TransformComponent to be rendered */

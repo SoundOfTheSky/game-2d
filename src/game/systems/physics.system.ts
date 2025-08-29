@@ -1,13 +1,12 @@
-import { HitboxComponent } from '../../components/hitbox.component'
-import { TransformComponent } from '../../components/transform.component'
-import { VelocityComponent } from '../../components/velocity.component'
 import ECSEntity from '../../ecs/entity'
 import { ECSQuery } from '../../ecs/query'
 import { ECSFixedUpdateSystem } from '../../ecs/system'
-import DefaultWorld from '../../worlds/default.world'
-
-import Rect from './body/rect'
-import RTree from './rtree'
+import Rect from '../../physics/body/rect'
+import RTree from '../../physics/rtree'
+import { HitboxComponent } from '../components/hitbox.component'
+import { TransformComponent } from '../components/transform.component'
+import { VelocityComponent } from '../components/velocity.component'
+import DefaultWorld from '../worlds/default.world'
 
 export default class PhysicsSystem extends ECSFixedUpdateSystem {
   declare public world: DefaultWorld

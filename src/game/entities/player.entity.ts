@@ -1,15 +1,13 @@
+import ECSEntity from '../../ecs/entity'
+import Circle from '../../physics/body/circle'
+import Vector2 from '../../physics/body/vector2'
 import { AnimationComponent } from '../components/animated.component'
 import { HitboxComponent } from '../components/hitbox.component'
 import { HPComponent } from '../components/hp.component'
 import { InputComponent } from '../components/input.component'
 import { TransformComponent } from '../components/transform.component'
 import { VelocityComponent } from '../components/velocity.component'
-import ECSEntity from '../ecs/entity'
-import DashAbility from '../systems/abilities/dash.ability'
 import { generateAnimation } from '../systems/animation.system'
-import { Key } from '../systems/input.system'
-import Circle from '../systems/physics/body/circle'
-import Vector2 from '../systems/physics/body/vector2'
 import DefaultWorld from '../worlds/default.world'
 
 export default function createPlayer(
@@ -58,8 +56,7 @@ export default function createPlayer(
     },
   })
   new InputComponent(entity, {
-    moveToVelocity: true,
-    abilities: new Map([[Key.MOVE, new DashAbility(entity)]]),
+    moveToVelocity: 0,
   })
   entity.addTag('camFollow')
   new HPComponent(entity, {

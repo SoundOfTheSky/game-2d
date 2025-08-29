@@ -1,14 +1,12 @@
-import { pushToSorted } from '@softsky/utils'
-
 import { HitboxComponent } from '../components/hitbox.component'
 import { RenderableComponent } from '../components/renderable.component'
 import { TransformComponent } from '../components/transform.component'
-import { ECSQuery } from '../ecs/query'
-import { ECSSystem } from '../ecs/system'
+import { ECSQuery } from '../../ecs/query'
+import { ECSSystem } from '../../ecs/system'
 import DefaultWorld from '../worlds/default.world'
 
-import Rect from './physics/body/rect'
-import Vector2 from './physics/body/vector2'
+import Rect from '../../physics/body/rect'
+import Vector2 from '../../physics/body/vector2'
 
 export class RenderSystem extends ECSSystem {
   declare public world: DefaultWorld
@@ -42,24 +40,37 @@ export class RenderSystem extends ECSSystem {
       renderableComponent: RenderableComponent
       transformComponent: TransformComponent
       order: number
-    }[] = []
-    for (const entity of this.renderables$.matches) {
+    }[] = [...this.renderables$.matches].map((entity) => {
       const renderableComponent = entity.components.get(RenderableComponent)!
       const transformComponent =
         entity.components.get(TransformComponent) ??
         new TransformComponent(entity)
-      const order =
-        renderableComponent.data.order ?? transformComponent.data.position.y
-      pushToSorted(
-        ordered,
-        {
-          renderableComponent,
-          transformComponent,
-          order,
-        },
-        (entity) => entity.order > order,
-      )
-    }
+      return {
+        renderableComponent,
+        transformComponent,
+        order:
+          renderableComponent.data.priority ??
+          transformComponent.data.position.y,
+      }
+    })
+    ordered.sort((a, b) => b.order - a.order)
+    // for (const entity of this.renderables$.matches) {
+    //   const renderableComponent = entity.components.get(RenderableComponent)!
+    //   const transformComponent =
+    //     entity.components.get(TransformComponent) ??
+    //     new TransformComponent(entity)
+    //   const order =
+    //     renderableComponent.data.priority ?? transformComponent.data.position.y
+    //   pushToSorted(
+    //     ordered,
+    //     {
+    //       renderableComponent,
+    //       transformComponent,
+    //       order,
+    //     },
+    //     (entity) => order - entity.order,
+    //   )
+    // }
     for (let index = 0; index < ordered.length; index++) {
       const { renderableComponent, transformComponent } = ordered[index]!
       if (renderableComponent.data.opacity !== undefined)
