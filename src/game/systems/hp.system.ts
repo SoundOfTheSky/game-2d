@@ -1,7 +1,7 @@
-import { HitboxComponent } from '../components/hitbox.component'
-import { HPComponent } from '../components/hp.component'
 import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
+import { HitboxComponent } from '../components/hitbox.component'
+import { HPComponent } from '../components/hp.component'
 import DefaultWorld from '../worlds/default.world'
 
 export default class HPSystem extends ECSSystem {

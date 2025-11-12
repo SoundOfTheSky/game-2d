@@ -29,7 +29,7 @@ export default class ECSWorld extends Base {
   public queueUpdates = new Map<ECSEntity, ECSComponentFilter[] | undefined>()
   public time = 0
   public deltaTime = 0
-  public generatorSystem: Generator<unknown, unknown, unknown>[] = []
+  public generatorSystems: Generator<unknown, unknown, unknown>[] = []
   public systemMap: Omit<Map<Constructor<ECSSystem>, ECSSystem>, 'get'> & {
     get<T extends ECSSystem>(key: Constructor<T>): T | undefined
   } = new Map()
@@ -68,9 +68,9 @@ export default class ECSWorld extends Base {
       this.systems[index]!.tick()
 
     // Generator systems update
-    for (let index = 0; index < this.generatorSystem.length; index++)
-      if (this.generatorSystem[index]!.next().done)
-        this.generatorSystem.splice(index--, 1)
+    for (let index = 0; index < this.generatorSystems.length; index++)
+      if (this.generatorSystems[index]!.next().done)
+        this.generatorSystems.splice(index--, 1)
   }
 
   public saveEntities(): ECSEntityExport[] {

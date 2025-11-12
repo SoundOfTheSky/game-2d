@@ -8,7 +8,6 @@ import Vector2 from '../../physics/body/vector2'
 export type Renderable = {
   source: CanvasImageSource
   size: Vector2
-  opacity?: number
   priority?: number
   offset?: Vector2
 }

@@ -1,28 +1,25 @@
 import ECSWorld from '../ecs/world'
 
 import { initCanvas } from './utils/canvas'
-import { loadImage } from './utils/files'
 
 export default class Game {
   public time = 0
-  public resources: Record<string, HTMLImageElement | string> = {}
-  public world!: ECSWorld
+  public paused = false
 
   public constructor(
     public canvas: HTMLCanvasElement,
-    resources: string[],
-    createWorld: (game: Game) => ECSWorld,
+    public world: ECSWorld,
   ) {
     window.addEventListener('resize', () => initCanvas(canvas))
     initCanvas(canvas)
-    void this.preloadResources(resources).then(() => {
-      this.world = createWorld(this)
-      this.tick(0)
+    document.addEventListener('keypress', (event) => {
+      if (event.key === 'p') this.paused = !this.paused
+      else if (event.key === ']') this.world.tick(this.world.time + 16.6)
     })
   }
 
   public tick(time: number) {
-    this.world.tick(time)
+    if (!this.paused) this.world.tick(time)
     // let fakeT = 0
     requestAnimationFrame((t) => {
       this.tick(t)
@@ -30,17 +27,5 @@ export default class Game {
     // setTimeout(() => {
     //   this.tick(performance.now());
     // }, 1);
-  }
-
-  protected async preloadResources(resources: string[]) {
-    const loaded = await Promise.all(
-      resources.map((file) =>
-        file.endsWith('.webp')
-          ? loadImage(file)
-          : fetch(file).then((x) => x.text()),
-      ),
-    )
-    for (let index = 0; index < loaded.length; index++)
-      this.resources[resources[index]!] = loaded[index]!
   }
 }

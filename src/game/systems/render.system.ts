@@ -1,12 +1,11 @@
+import { ECSQuery } from '../../ecs/query'
+import { ECSSystem } from '../../ecs/system'
+import Rect from '../../physics/body/rect'
+import Vector2 from '../../physics/body/vector2'
 import { HitboxComponent } from '../components/hitbox.component'
 import { RenderableComponent } from '../components/renderable.component'
 import { TransformComponent } from '../components/transform.component'
-import { ECSQuery } from '../../ecs/query'
-import { ECSSystem } from '../../ecs/system'
 import DefaultWorld from '../worlds/default.world'
-
-import Rect from '../../physics/body/rect'
-import Vector2 from '../../physics/body/vector2'
 
 export class RenderSystem extends ECSSystem {
   declare public world: DefaultWorld
@@ -19,7 +18,10 @@ export class RenderSystem extends ECSSystem {
 
   public constructor(world: DefaultWorld) {
     super(world)
-    this.renderables$ = new ECSQuery(world, [RenderableComponent])
+    this.renderables$ = new ECSQuery(world, [
+      RenderableComponent,
+      TransformComponent,
+    ])
     this.follow$ = new ECSQuery(world, [HitboxComponent, 'camFollow'])
   }
 
@@ -42,9 +44,7 @@ export class RenderSystem extends ECSSystem {
       order: number
     }[] = [...this.renderables$.matches].map((entity) => {
       const renderableComponent = entity.components.get(RenderableComponent)!
-      const transformComponent =
-        entity.components.get(TransformComponent) ??
-        new TransformComponent(entity)
+      const transformComponent = entity.components.get(TransformComponent)!
       return {
         renderableComponent,
         transformComponent,
@@ -54,25 +54,9 @@ export class RenderSystem extends ECSSystem {
       }
     })
     ordered.sort((a, b) => b.order - a.order)
-    // for (const entity of this.renderables$.matches) {
-    //   const renderableComponent = entity.components.get(RenderableComponent)!
-    //   const transformComponent =
-    //     entity.components.get(TransformComponent) ??
-    //     new TransformComponent(entity)
-    //   const order =
-    //     renderableComponent.data.priority ?? transformComponent.data.position.y
-    //   pushToSorted(
-    //     ordered,
-    //     {
-    //       renderableComponent,
-    //       transformComponent,
-    //       order,
-    //     },
-    //     (entity) => order - entity.order,
-    //   )
-    // }
     for (let index = 0; index < ordered.length; index++) {
       const { renderableComponent, transformComponent } = ordered[index]!
+      console.log('tick', this.world.time, renderableComponent)
       if (renderableComponent.data.opacity !== undefined)
         this.world.context.globalAlpha = renderableComponent.data.opacity
       if (transformComponent.data.rotation)

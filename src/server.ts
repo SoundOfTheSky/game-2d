@@ -6,8 +6,8 @@ type Room = Bun.ServerWebSocket<WSData>[]
 
 const rooms = new Map<string, Room>()
 
-serve<WSData, object>({
-  port: 54_345,
+serve<WSData>({
+  port: 45_565,
   fetch(request, server) {
     const url = new URL(request.url)
     const roomId = url.searchParams.get('room')
@@ -28,7 +28,9 @@ serve<WSData, object>({
         return
       }
       room.push(ws)
+      // Send form the name of the room
       room[0]!.sendText(`s,r,${room.length}`)
+      console.log('connect', ws)
     },
     close(ws) {
       const room = rooms.get(ws.data)
@@ -36,6 +38,7 @@ serve<WSData, object>({
       removeFromArray(room, ws)
       if (room.length === 0) rooms.delete(ws.data)
       else room[0]!.sendText(`s,r,${room.length}`)
+      console.log('close', ws)
     },
     message(ws, message) {
       const room = rooms.get(ws.data)
@@ -43,6 +46,7 @@ serve<WSData, object>({
         ws.close()
         return
       }
+      console.log('message', `${room.indexOf(ws)},${message}`)
       room[0]!.sendText(`${room.indexOf(ws)},${message}`)
     },
   },

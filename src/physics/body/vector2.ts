@@ -121,4 +121,9 @@ export default class Vector2 implements IPhysicsBody {
   public toString() {
     return `Vector2<${this.x},${this.y}>`
   }
+
+  public *[Symbol.iterator](): Generator<number> {
+    yield this.x
+    yield this.y
+  }
 }

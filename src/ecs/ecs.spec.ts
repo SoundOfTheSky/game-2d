@@ -1,20 +1,20 @@
-import { describe, expect, it } from '@jest/globals'
 import { combinations } from '@softsky/utils'
+// eslint-disable-next-line import-x/no-unresolved
+import { describe, expect, it } from 'bun:test'
 
 import ECSComponent from './component'
 import ECSEntity from './entity'
 import { ECSQuery } from './query'
 import ECSWorld from './world'
 
-class NumberComponent extends ECSComponent<number> {}
-class StringComponent extends ECSComponent<string> {}
-class A extends ECSComponent<number> {}
-class B extends ECSComponent<number> {}
-class C extends ECSComponent<number> {}
-class D extends ECSComponent<number> {}
-const COMBINATIONS = combinations([A, B, C, D])
-
 describe('ecs', () => {
+  class NumberComponent extends ECSComponent<number> {}
+  class StringComponent extends ECSComponent<string> {}
+  class A extends ECSComponent<number> {}
+  class B extends ECSComponent<number> {}
+  class C extends ECSComponent<number> {}
+  class D extends ECSComponent<number> {}
+  const COMBINATIONS = combinations([A, B, C, D])
   function testQuery(
     query: ECSQuery,
     entity: ECSEntity,
