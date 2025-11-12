@@ -1,13 +1,12 @@
+import { ECSQuery } from '../../ecs/query'
+import { ECSSystem } from '../../ecs/system'
+import Vector2 from '../../physics/body/vector2'
 import {
   AnimationComponent,
   AnimationFrame,
 } from '../components/animated.component'
 import { RenderableComponent } from '../components/renderable.component'
-import { ECSQuery } from '../../ecs/query'
-import { ECSSystem } from '../../ecs/system'
 import DefaultWorld from '../worlds/default.world'
-
-import Vector2 from '../../physics/body/vector2'
 
 export class AnimationSystem extends ECSSystem {
   declare public world: DefaultWorld

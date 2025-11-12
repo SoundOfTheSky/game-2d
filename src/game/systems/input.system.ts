@@ -2,7 +2,6 @@ import { room, RoomMain } from '@/room'
 
 import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
-import ECSWorld from '../../ecs/world'
 import Vector2 from '../../physics/body/vector2'
 import { InputComponent } from '../components/input.component'
 import { VelocityComponent } from '../components/velocity.component'
@@ -69,18 +68,6 @@ export class InputSystem extends ECSSystem {
       move: new Vector2(),
     }))
   public entities$ = new ECSQuery(this.world, [InputComponent])
-
-  public constructor(world: ECSWorld) {
-    super(world)
-    this.registerEvent(
-      globalThis,
-      'contextmenu',
-      (event) => {
-        event.preventDefault()
-      },
-      false,
-    )
-  }
 
   public tick() {
     // Check device actions

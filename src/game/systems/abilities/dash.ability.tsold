@@ -1,9 +1,9 @@
+import ECSEntity from '@/ecs/entity'
 import { Ability } from '@/game/components/abilities.component'
 import { DestroyComponent } from '@/game/components/destroy.component'
 import { RenderableComponent } from '@/game/components/renderable.component'
 import { TransformComponent } from '@/game/components/transform.component'
 import { VelocityComponent } from '@/game/components/velocity.component'
-import ECSEntity from '@/ecs/entity'
 
 export default class DashAbility extends Ability {
   public cooldown = 250

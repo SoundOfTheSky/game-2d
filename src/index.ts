@@ -1,10 +1,79 @@
-import { startPCGame } from './pc'
-import startPhoneGame from './phone'
-
+import { atlasRenderer } from './game/shaders/atlas/atlas.shader'
+import { createGLTexture } from './game/shaders/webgl'
+import { loadImage } from './game/utils/files'
 import './global.scss'
+// import { effect } from '@softsky/utils'
 
-if (window.innerHeight > window.innerWidth) startPhoneGame()
-else startPCGame()
+// import Game from './game/game'
+// import DefaultWorld from './game/worlds/default.world'
+// import { room } from './room'
+
+// if (window.innerHeight > window.innerWidth) console.log('what')
+// else startPCGame()
+// initUI()
+
+// function startPCGame() {
+//   console.log('STARTING PC GAME')
+//   globalThis.addEventListener(
+//     'contextmenu',
+//     (event) => {
+//       event.preventDefault()
+//     },
+//     false,
+//   )
+// }
+
+// function initUI() {
+//   const $ui = document.querySelector<HTMLDivElement>('.ui')!
+//   const $connect = $ui.querySelector<HTMLDivElement>('.connect')!
+//   registerConnect()
+
+//   function registerConnect() {
+//     const $code = $connect.querySelector<HTMLInputElement>('input')!
+//     const $submit = $connect.querySelector<HTMLButtonElement>('button')!
+//     $submit.addEventListener('click', () => {
+//       $submit.disabled = true
+//       room.connect($code.value)
+//     })
+
+//     effect(() => {
+//       if (room.connected()) {
+//         $connect.classList.remove('visible')
+//         $submit.disabled = false
+//         const canvas = document.querySelector<HTMLCanvasElement>('canvas')!
+//         new Game(canvas, new DefaultWorld(canvas)).tick(0)
+//       } else {
+//         $connect.classList.add('visible')
+//       }
+//     })
+//   }
+// }
+
+void loadImage('/game/mc.webp').then((image) => {
+  createGLTexture(0, image)
+  let offset = 0
+  let x = 500
+  atlasRenderer.add(0, {
+    aOpacity: [1],
+    aRotation: [0],
+    aScale: [4, 4],
+    aTranslate: [500, 500],
+    aOffset: [0, 64],
+    aSize: [32, 32],
+  })
+  atlasRenderer.textures.set('uSampler', 0)
+  atlasRenderer.render()
+  setInterval(() => {
+    offset++
+    x += 1
+    if (offset === 6) offset = 0
+    atlasRenderer.update(0, {
+      aOffset: [32 * offset, 64],
+      aTranslate: [x, 500],
+    })
+    atlasRenderer.render()
+  }, 16.6)
+})
 
 declare global {
   function setTimeout<TArguments extends unknown[]>(

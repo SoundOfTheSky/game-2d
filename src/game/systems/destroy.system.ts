@@ -1,6 +1,6 @@
-import { DestroyComponent } from '../components/destroy.component'
 import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
+import { DestroyComponent } from '../components/destroy.component'
 import DefaultWorld from '../worlds/default.world'
 
 export default class DestroySystem extends ECSSystem {

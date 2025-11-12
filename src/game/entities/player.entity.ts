@@ -8,19 +8,24 @@ import { InputComponent } from '../components/input.component'
 import { TransformComponent } from '../components/transform.component'
 import { VelocityComponent } from '../components/velocity.component'
 import { generateAnimation } from '../systems/animation.system'
+import { StreamingSystem } from '../systems/streaming.system'
 import DefaultWorld from '../worlds/default.world'
 
 export default function createPlayer(
   world: DefaultWorld,
   options: {
     position?: Vector2
+    scale?: number
   } = {},
 ) {
   const entity = new ECSEntity(world)
   new TransformComponent(entity, {
     position: options.position,
+    scale: options.scale,
   })
-  const source = world.resources['/game/mc.png'] as HTMLImageElement
+  const source = world.systemMap
+    .get(StreamingSystem)!
+    .getResource('/game/mc.webp') as HTMLImageElement
   const animationComponent = new AnimationComponent(entity, {
     animations: {
       walkUp: generateAnimation(source, 0, 6),

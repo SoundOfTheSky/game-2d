@@ -42,6 +42,18 @@ export class ECSSystem {
   }
 }
 
+/**
+ * Same as ECSSystem, but will be called every fixed time interval.
+ * Use this for physics, animation, etc.
+ *
+ * @example
+ * ```ts
+ * class PhysicsSystem extends ECSFixedUpdateSystem {
+ *   public fixedUpdate(): void {
+ *     // Your physics logic here
+ *   }
+ * }
+ */
 export class ECSFixedUpdateSystem extends ECSSystem {
   public leftoverTime = 0
   public timeBetweenUpdates = 16.6

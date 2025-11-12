@@ -30,24 +30,36 @@ export class Room {
     this.connected(false)
     this.socket?.close()
     this.socket = new WebSocket(
-      `ws://${document.location.hostname}:54345?&room=${roomId}`,
+      `ws://${document.location.hostname}:45565?&room=${roomId}`,
     )
-    this.socket.addEventListener('open', () => {
-      setTimeout(() => this.connected(true), 1000)
-    })
-    this.socket.addEventListener('close', () => {
-      this.connected(false)
-      setTimeout(() => {
-        this.connect()
-      }, 5000)
-    })
-    this.socket.addEventListener('error', (error) => {
-      this.connected(false)
-      console.error(error)
-      setTimeout(() => {
-        this.connect()
-      }, 5000)
-    })
+    this.socket.addEventListener(
+      'open',
+      () => {
+        this.connected(true)
+      },
+      {
+        once: true,
+      },
+    )
+    this.socket.addEventListener(
+      'close',
+      () => {
+        this.connected(false)
+      },
+      {
+        once: true,
+      },
+    )
+    this.socket.addEventListener(
+      'error',
+      (error) => {
+        this.connected(false)
+        console.error(error)
+      },
+      {
+        once: true,
+      },
+    )
   }
 }
 
@@ -94,7 +106,9 @@ export class RoomDevice extends Room {
   public connect(roomId?: string) {
     super.connect(roomId)
     this.socket?.addEventListener('open', () => {
-      this.socket?.send(`size,${window.innerWidth},${window.innerHeight}`)
+      this.socket?.send(
+        `${RoomEvents.SIZE},${window.innerWidth},${window.innerHeight}`,
+      )
     })
   }
 
@@ -124,7 +138,7 @@ export class RoomMain extends Room {
 
   public connect(roomId?: string) {
     super.connect(roomId)
-    this.socket?.addEventListener('message', ({ data }) => {
+    this.socket!.addEventListener('message', ({ data }) => {
       if (typeof data !== 'string') return
       this.handleMessage(...(data.split(',') as [string, string]))
     })
@@ -132,13 +146,10 @@ export class RoomMain extends Room {
 
   protected handleMessage(from: string, event: string, ...data: string[]) {
     const member = this.devices[+from - 1]!
+    // Either from server or from other client
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (from !== 's' && !member) return
     switch (event as RoomEvents) {
-      case RoomEvents.ROOM: {
-        this.connected(true)
-        break
-      }
       case RoomEvents.MOTION: {
         member.motion = [+data[0]!, +data[1]!, +data[2]!]
         member.rotationRate = [+data[3]!, +data[4]!, +data[5]!]
