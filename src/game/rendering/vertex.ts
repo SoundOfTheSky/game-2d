@@ -1,51 +1,14 @@
-export const canvas = document.querySelector('canvas')!
-const context = canvas.getContext('webgpu')
-if (!context) throw new Error('WebGPU is not supported')
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-const adapter = await navigator.gpu?.requestAdapter({
-  powerPreference: 'low-power',
-})
-if (!adapter) throw new Error('WebGPU is not supported')
-const presentationFormat = navigator.gpu.getPreferredCanvasFormat()
-const device = await adapter.requestDevice()
-context.configure({
-  device,
-  format: presentationFormat,
-  alphaMode: 'premultiplied',
-})
+import { device } from './webgpu'
 
-// === Resize ===
-function setCanvasSize() {
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-}
-setCanvasSize()
-window.addEventListener('resize', setCanvasSize)
-
-// === Texture ===
-export class Texture {
-  public texture
-
-  public constructor(source: HTMLImageElement) {
-    this.texture = device.createTexture({
-      size: [source.naturalWidth, source.naturalHeight],
-      format: 'rgba8unorm',
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-    })
-    this.update(source)
-  }
-
-  public update(source: HTMLImageElement) {
-    device.queue.copyExternalImageToTexture(
-      { source },
-      { texture: this.texture },
-      [source.width, source.height],
-    )
+type DataForAttributes<
+  Attributes extends Record<string, keyof typeof VERTEX_UNITS>,
+> = {
+  [K in keyof Attributes]: number[] & {
+    length: (typeof VERTEX_UNITS)[Attributes[K]]
   }
 }
 
-// === Vertex ===
-const VERTEX_FORMAT_32 = {
+const VERTEX_UNITS = {
   float32: 1,
   float32x2: 2,
   float32x3: 3,
@@ -59,17 +22,10 @@ const VERTEX_FORMAT_32 = {
   sint32x3: 3,
   sint32x4: 4,
 } as const
-type DataForAttributes<
-  Attributes extends Record<string, keyof typeof VERTEX_FORMAT_32>,
-> = {
-  [K in keyof Attributes]: number[] & {
-    length: (typeof VERTEX_FORMAT_32)[Attributes[K]]
-  }
-}
 
 /** Currently doesn't support formats below 4 bytes */
 export class Vertex<
-  Attributes extends Record<string, keyof typeof VERTEX_FORMAT_32>,
+  Attributes extends Record<string, keyof typeof VERTEX_UNITS>,
 > {
   public readonly buffer
   public readonly idToIndex = new Map<number, number>()
@@ -89,7 +45,7 @@ export class Vertex<
       const format = attributes[key]!
       this.vertexAttributes.push({ shaderLocation, offset, format })
       shaderLocation++
-      offset += VERTEX_FORMAT_32[format] * 4
+      offset += VERTEX_UNITS[format] * 4
     }
     this.instanceSize = offset / 4
     this.data = new Float32Array(this.instanceSize * maxInstances)
@@ -102,7 +58,7 @@ export class Vertex<
   public add(
     id: number,
     instance: DataForAttributes<Attributes>,
-    skipUpload = false,
+    upload = false,
   ) {
     if (this.indexToId.length === this.maxInstances)
       throw new Error('Max instances reached')
@@ -116,7 +72,7 @@ export class Vertex<
       this.data.set(values, cursor)
       cursor += values.length
     }
-    if (!skipUpload)
+    if (upload)
       device.queue.writeBuffer(
         this.buffer,
         offset * 4,
@@ -130,7 +86,7 @@ export class Vertex<
   public update(
     id: number,
     instance: Partial<DataForAttributes<Attributes>>,
-    skipUpload = false,
+    upload = false,
   ) {
     const index = this.idToIndex.get(id)
     if (index === undefined) return
@@ -139,9 +95,9 @@ export class Vertex<
     for (const name in this.attributes) {
       const values = instance[name]
       if (values) this.data.set(values, cursor)
-      cursor += VERTEX_FORMAT_32[this.attributes[name]!] * 4
+      cursor += VERTEX_UNITS[this.attributes[name]!] * 4
     }
-    if (!skipUpload)
+    if (upload)
       device.queue.writeBuffer(
         this.buffer,
         offset * 4,
@@ -149,7 +105,7 @@ export class Vertex<
       )
   }
 
-  public remove(id: number, skipUpload = false) {
+  public remove(id: number, upload = false) {
     const index = this.idToIndex.get(id)
     if (index === undefined) return
     this.idToIndex.delete(id)
@@ -163,7 +119,7 @@ export class Vertex<
       lastOffset + this.instanceSize,
     )
     this.data.set(updatedInstance, offset)
-    if (!skipUpload)
+    if (upload)
       device.queue.writeBuffer(this.buffer, index * 4, updatedInstance)
     // Updare id/index mapping
     this.idToIndex.set(lastId, index)

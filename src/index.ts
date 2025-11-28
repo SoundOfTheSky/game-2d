@@ -1,5 +1,4 @@
-import { gl } from './game/rendering/webgl'
-import { Vertex } from './game/rendering/webgpu3'
+import { UniformArray, Uniform } from './game/rendering/uniform'
 import './global.scss'
 // import { effect } from '@softsky/utils'
 
@@ -48,17 +47,6 @@ import './global.scss'
 //   }
 // }
 
-if (gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) < 16)
-  throw new Error('Your device must support at least 16 textures loaded')
-if (gl.getParameter(gl.MAX_TEXTURE_SIZE) < 4096)
-  throw new Error(
-    'Your device must support textures with size of at least 4096 pixels',
-  )
-if (gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS) < 1024)
-  throw new Error('Your device must support textures with at least 1024 layers')
-
-console.log(gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS))
-
 // void loadImage('/game/mc.webp').then((image) => {
 //   const w = 32 / image.naturalWidth
 //   const h = 32 / image.naturalHeight
@@ -95,14 +83,33 @@ console.log(gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS))
 //   }, 16.6)
 // })
 
-const vertex = new Vertex({
-  pos: 'float32x2',
-  opacity: 'float32',
-})
-vertex.add(1, {
-  pos: [1, 2],
-  opacity: [1],
-})
+// const vertex = new Vertex({
+//   pos: 'float32x2',
+//   opacity: 'float32',
+// })
+// vertex.add(1, {
+//   pos: [1, 2],
+//   opacity: [1],
+// })
+
+const uniform = new Uniform(
+  {
+    pos: 'vec4',
+    arr: new UniformArray(
+      {
+        a: 'atomic',
+        b: 'vec2',
+      },
+      6,
+    ),
+  },
+  0,
+)
+uniform.value.pos[3] = 0
+uniform.value.arr[0].b = [1, 1]
+uniform.upload()
+
+// await createPipelineAndDraw()
 
 declare global {
   function setTimeout<TArguments extends unknown[]>(

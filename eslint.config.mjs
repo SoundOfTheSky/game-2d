@@ -6,11 +6,13 @@ export default [
   ...skyEslintConfig,
   {
     rules: {
-      'unicorn/explicit-length-check': 0,
-      '@typescript-eslint/no-unsafe-assignment': 0, // Any is used sparingly
+      '@typescript-eslint/no-unsafe-assignment': 0,
+      '@typescript-eslint/no-unsafe-return': 0,
+      '@typescript-eslint/no-unsafe-member-access': 0,
+      '@typescript-eslint/no-unsafe-argument': 0,
+      '@typescript-eslint/no-unsafe-call': 0,
       '@typescript-eslint/no-empty-function': 0,
-      'unicorn/number-literal-case': 0,
-      'unicorn/prefer-spread': 0,
+      '@typescript-eslint/no-this-alias': 0,
     },
   },
 ]

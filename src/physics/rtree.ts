@@ -52,7 +52,7 @@ export default class RTree {
   public search(rect: Rect, result: RTree[] = []): RTree[] {
     if (!rect.intersectRect(this.rect)) return result
     const stack: RTree[] = [this]
-    while (stack.length !== 0) {
+    while (stack.length > 0) {
       const node = stack.pop()!
       for (let index = 0; index < node.children.length; index++) {
         const child = node.children[index]!
@@ -76,7 +76,7 @@ export default class RTree {
 
   public all(result: RTree[] = []): RTree[] {
     const stack: RTree[] = [this]
-    while (stack.length !== 0) {
+    while (stack.length > 0) {
       const node = stack.pop()!
       if (node.leaf)
         for (let index = 0; index < node.children.length; index++)
@@ -89,7 +89,7 @@ export default class RTree {
   }
 
   protected chooseSubtree(rect: Rect) {
-    // eslint-disable-next-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: RTree = this
     while (!node.leaf) {
       let best = node.children[0]!
@@ -219,7 +219,7 @@ export default class RTree {
 
   public remove(rect: Rect) {
     const stack: RTree[] = [this]
-    while (stack.length !== 0) {
+    while (stack.length > 0) {
       const node = stack.pop()!
       if (node.leaf) {
         for (let index = 0; index < node.children.length; index++)
@@ -236,7 +236,7 @@ export default class RTree {
   }
 
   protected condense() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias, unicorn/no-this-assignment
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: RTree = this
     while (true) {
       if (node.children.length === 0 && node.parent) {
