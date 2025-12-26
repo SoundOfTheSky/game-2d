@@ -1,38 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Tuple } from '@softsky/utils'
 
 import { device } from './webgpu'
-
-type PathNode = { key: string; prev?: PathNode }
-
-type DataForAttributes<
-  Attributes extends Record<string, keyof typeof VERTEX_UNITS>,
-> = {
-  [K in keyof Attributes]: number[] & {
-    length: (typeof VERTEX_UNITS)[Attributes[K]]
-  }
-}
-
-const VERTEX_UNITS = {
-  float32: 1,
-  float32x2: 2,
-  float32x3: 3,
-  float32x4: 4,
-  uint32: 1,
-  uint32x2: 2,
-  uint32x3: 3,
-  uint32x4: 4,
-  sint32: 1,
-  sint32x2: 2,
-  sint32x3: 3,
-  sint32x4: 4,
-} as const
-
-export enum WebGPUBufferView {
-  FLOAT = 0,
-  INT = 1,
-  UNT = 2,
-}
 
 export const WEBGPU_SCHEMA_UNITS = {
   i32: [1, 1, 1],
@@ -58,35 +26,31 @@ export const WEBGPU_SCHEMA_UNITS = {
   mat4x4f: [16, 4, 0],
 } as const
 
-type WebGPUSchemaUnits = typeof WEBGPU_SCHEMA_UNITS
-
-type WebGPUSchemaData =
-  | keyof WebGPUSchemaUnits
-  | WebGPUSchema
-  | Record<string, WebGPUSchema>
-
-type SchemaToValue<S extends WebGPUSchemaData> =
-  S extends WebGPUSchema<infer ArraySchema, infer ArraySize>
-    ? ArraySize extends number
-      ? SchemaToValue<ArraySchema>[]
-      : SchemaToValue<ArraySchema>
-    : S extends keyof WebGPUSchemaUnits
-      ? WebGPUSchemaUnits[S] extends readonly [
-          infer Len extends number,
-          any,
-          any,
-        ]
-        ? Tuple<number, Len>
-        : never
-      : never
-
-const PROXY_HANDLER = {
-  set(target: any, prop: string | symbol, value: any) {
-    for (const key in value)
-      (target[prop as any]! as Record<string, any>)[key] = value[key]
-    return true
-  },
+export enum WebGPUBufferView {
+  FLOAT = 0,
+  INT = 1,
+  UNT = 2,
 }
+type WebGPUSchemaUnits = typeof WEBGPU_SCHEMA_UNITS
+type WebGPUSchemaUnitsKeys = keyof WebGPUSchemaUnits
+type WebGPUSchemaData =
+  | WebGPUSchema<any>
+  | WebGPUSchemaArray<any, any>
+  | WebGPUSchemaUnitsKeys
+type SchemaToValue<S extends WebGPUSchemaData> =
+  S extends WebGPUSchemaArray<infer Schema, any> // If array
+    ? SchemaToValue<Schema>[]
+    : S extends WebGPUSchema<infer Schema> // If object
+      ? { -readonly [K in keyof Schema]: SchemaToValue<Schema[K]> }
+      : S extends WebGPUSchemaUnitsKeys // If value
+        ? WebGPUSchemaUnits[S] extends readonly [
+            infer Len extends number,
+            any,
+            any,
+          ]
+          ? Tuple<number, Len>
+          : never
+        : never
 
 /** Currently doesn't support formats below 4 bytes */
 export class WebGPUBuffer {
@@ -143,47 +107,66 @@ export class WebGPUBuffer {
   }
 }
 
-/**
- * Create WebGPU
- */
-export class WebGPUSchema<
-  const S extends WebGPUSchemaData = WebGPUSchemaData,
-  L extends number | undefined = undefined,
+export class WebGPUSchemaArray<
+  const S extends WebGPUSchema<any> | WebGPUSchemaUnitsKeys,
+  L extends number,
 > {
-  public offsets = new Map<string, number>()
-  public align = 1
-  public size = 0
+  public readonly elementSize
+  /** Includes after alignment */
+  public readonly size
+  /** Pad offset by this number before use */
+  public readonly align
 
   public constructor(
-    public schema: S,
-    public length?: L,
+    public readonly schema: S,
+    public readonly length: L,
   ) {
-    if (typeof schema === 'string') {
+    if (typeof this.schema === 'string') {
       const [size, align] =
-        WEBGPU_SCHEMA_UNITS[schema as keyof WebGPUSchemaUnits]
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        WEBGPU_SCHEMA_UNITS[this.schema as WebGPUSchemaUnitsKeys]
+      // Can't be more than 4. Only for vec3 case
+      this.elementSize = align === 4 ? 4 : size
       this.align = align
-      this.size = size
-      return
+    } else {
+      this.elementSize = this.schema.size
+      this.align = this.schema.align
     }
-    // Weird case but let's just copy schema
-    if (schema instanceof WebGPUSchema) {
-      this.schema = schema.schema as S
-      this.offsets = schema.offsets
-      this.size = schema.size
-      this.length = schema.length
-      return
-    }
+    this.size = this.elementSize * this.length
+  }
+}
 
+export class WebGPUSchema<const S extends Record<string, WebGPUSchemaData>> {
+  /** Offset of each field */
+  public offsets = new Map<string, number>()
+  /** Pad offset by this number before use */
+  public align = 1
+  /** Includes after alignment */
+  public size
+
+  public constructor(public schema: S) {
     let offset = 0
-    // eslint-disable-next-line @typescript-eslint/no-for-in-array
+    const pad = (align: number) =>
+      (offset += (align - (offset % align)) % align)
     for (const key in schema) {
-      const value = schema[key] as WebGPUSchema<any, number | undefined>
-      if (value.align > this.align) this.align = value.align
-      offset += (value.align - (offset % value.align)) % value.align
-      this.offsets.set(key, offset)
-      offset += value.size * (value.length ?? 1)
+      const value = schema[key]!
+      if (typeof value === 'string') {
+        const [size, align] =
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          WEBGPU_SCHEMA_UNITS[value as WebGPUSchemaUnitsKeys]
+        pad(align)
+        this.offsets.set(key, offset)
+        offset += size
+        if (align > this.align) this.align = align
+      } else {
+        pad(value.align)
+        this.offsets.set(key, offset)
+        offset += value.size
+        pad(value.align)
+        if (value.align > this.align) this.align = value.align
+      }
     }
-    offset += (this.align - (offset % this.align)) % this.align
+    pad(this.align)
     this.size = offset
   }
 }
@@ -193,250 +176,229 @@ export class WebGPUSchema<
  * When working with data please only use direct assingment
  *
  * @example
- * const memory = new WebGPUMemory({
+ * const memory = new WebGPUMemory(new WebGPUSchema({
  *   pos: new WebGPUSchemaArray('vec2f', 32),
- * })
- * memory.value.pos = [16,8]
- * memory.upload()
+ * }))
  * memory.value.pos[1] = 16
  * memory.upload()
  */
 export class WebGPUMemory<
   const S extends WebGPUSchemaData,
 > extends WebGPUBuffer {
-  protected readonly offsets
-  protected readonly _value: SchemaToValue<S>
-
   /**
-   * It's a virtual object that is bound to specific addresses in Uniform's memory.
+   * It's a virtual object that is bound to specific addresses in memory.
    * Setting data with anything but `=` will not work.
    * Equality operators on objects will not work as expected.
    * After updating data you have to call `upload()`
    */
-  public get value(): SchemaToValue<S> {
-    // @ts-expect-error TS can't follow
-    return this._value
-  }
-  public set value(value: SchemaToValue<S>) {
-    for (const key in value)
-      (this._value as Record<string, any>)[key] = value[key]
-  }
+  protected readonly value: SchemaToValue<S>
 
   public constructor(
     public schema: S,
     usage: GPUBufferUsageFlags,
   ) {
-    // eslint-disable-next-line prefer-const
-    let self: WebGPUMemory<S>
-    const offsets = new Map<string, number>()
-    let offset = 0
-
-    const pad = (align: number) => {
-      offset += (align - (offset % align)) % align
-    }
-
-    const getAlign = (schema: WebGPUSchemaData): 1 | 2 | 4 => {
-      if (typeof schema === 'string') return WEBGPU_SCHEMA_UNITS[schema][1]
-      if (schema instanceof WebGPUSchemaArray) return getAlign(schema.schema)
-      let align: 1 | 2 | 4 = 1
-      for (const key in schema) {
-        const builtAlign = getAlign(schema[key])
-        // Possible values are 1,2,4
-        if (builtAlign === 4) return 4
-        if (builtAlign === 2) align = 2
-      }
-      return align
-    }
-
-    const build = (
-      buildSchema: WebGPUSchemaData = schema,
-      parent: any = {},
-      path = '',
-      name: string | number = '',
-    ) => {
-      const nextPath = path ? `${path}.${name}` : name.toString()
-      if (typeof buildSchema === 'string') {
-        const [size, align, viewIndex] = WEBGPU_SCHEMA_UNITS[buildSchema]
-        // Make sure each data is started from correct alignment
-        pad(align)
-        offsets.set(nextPath, offset)
-        const base = offset
-        offset += size
-        // Create proxy for uniform
-        return (parent[name] = new Proxy(
-          {},
-          {
-            get(_, prop) {
-              if (prop === 'length') return size
-              if (prop === Symbol.iterator)
-                return function* () {
-                  for (let i = 0; i < size; i++)
-                    yield self.dataViews[viewIndex]![base + i]
-                }
-              return self.dataViews[viewIndex]![
-                (base + +(prop as string)) as any
-              ]
-            },
-            set: (_, prop, value) =>
-              self.set(viewIndex, base + +(prop as string), value),
-          },
-        ))
-      }
-      if (buildSchema instanceof WebGPUSchemaArray) {
-        // Recursively set inner objects
-        const align = getAlign(buildSchema.schema)
-        pad(align)
-        const array: unknown[] = []
-        for (let i = 0; i < buildSchema.length; i++)
-          build(buildSchema.schema, array, nextPath, i)
-        pad(align)
-        return (parent[name] = new Proxy(array, PROXY_HANDLER))
-      }
-      // Recursively set inner objects
-      const object: Record<string, unknown> = {}
-      const align = getAlign(buildSchema)
-      pad(align)
-      for (const key in buildSchema)
-        build(buildSchema[key], object, nextPath, key)
-      pad(align)
-      return (parent[name] = new Proxy(object, PROXY_HANDLER))
-    }
-    const value = build(schema)
-    pad(4)
-    super(offset, usage)
-    this._value = value
-    this.offsets = offsets
-    self = this
-
-    // const createPathProxy = (buildSchema: WebGPUSchema = schema, path = '') =>
-    //   new Proxy(function () {}, {
-    //     get(_target, prop) {
-    //       if (typeof buildSchema === 'string') {
-    //       }
-    //       const nextPath = path ? `${path}.${String(prop)}` : String(prop)
-    //       return createPathProxy(nextPath)
-    //     },
-    //   })
-  }
-}
-
-/** Currently doesn't support formats below 4 bytes */
-export class WebGPUBufferInstances<
-  Attributes extends Record<string, keyof typeof VERTEX_UNITS>,
-> extends WebGPUBuffer {
-  public readonly idToIndex = new Map<number, number>()
-  public readonly indexToId: number[] = []
-  public readonly instanceSize
-
-  protected readonly vertexAttributes
-  protected uploadStart = Infinity
-  protected uploadEnd = 0
-
-  public constructor(
-    public readonly attributes: Attributes,
-    public readonly maxInstances = 256,
-  ) {
-    const vertexAttributes: [number, GPUVertexFormat][] = []
-    let offset = 0
-    for (const key in attributes) {
-      const format = attributes[key]!
-      vertexAttributes.push([offset, format])
-      offset += VERTEX_UNITS[format] * 4
-    }
-    const instanceSize = offset / 4
     super(
-      instanceSize * maxInstances,
-      GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      typeof schema === 'string'
+        ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          WEBGPU_SCHEMA_UNITS[schema as WebGPUSchemaUnitsKeys][1]
+        : schema.size,
+      usage,
     )
-    this.instanceSize = instanceSize
-    this.vertexAttributes = vertexAttributes
-  }
-
-  public add(id: number, instance: DataForAttributes<Attributes>) {
-    if (this.indexToId.length === this.maxInstances)
-      throw new Error('Max instances reached')
-    if (this.idToIndex.has(id))
-      throw new Error(`Instance "${id}" already exists`)
-    let cursor = this.indexToId.length * this.instanceSize
-    for (const name in this.attributes) {
-      const values = instance[name]
-      this.data.set(values, cursor)
-      cursor += values.length
-    }
-    this.uploadEnd = cursor
-    // Update id mapping
-    this.idToIndex.set(id, this.indexToId.length)
-    this.indexToId[this.indexToId.length] = id
-  }
-
-  public update(id: number, instance: Partial<DataForAttributes<Attributes>>) {
-    const index = this.idToIndex.get(id)
-    if (index === undefined) return
-    const offset = index * this.instanceSize
-    let cursor = offset
-    for (const name in this.attributes) {
-      const values = instance[name]
-      if (values) {
-        const end = values.length + cursor
-        if (cursor < this.uploadStart) this.uploadStart = cursor
-        if (end > this.uploadEnd) this.uploadEnd = end
-        this.data.set(values, cursor)
+    const createPathProxy = (
+      schema: WebGPUSchemaData,
+      path = '',
+      offset = 0,
+    ) => {
+      const pad = (align: number) => {
+        offset += (align - (offset % align)) % align
       }
-      cursor += VERTEX_UNITS[this.attributes[name]!] * 4
+      return new Proxy(this, {
+        get(target, prop) {
+          const property = String(prop)
+          const nextPath = path ? `${path}.${property}` : String(prop)
+          if (typeof schema === 'string') {
+            const [size, align, viewIndex] = WEBGPU_SCHEMA_UNITS[schema]
+            const index = +property
+            if (isNaN(index) || index < 0 || index >= size) return undefined
+            pad(align)
+            return target.dataViews[viewIndex]![offset + index]
+          }
+          if (schema instanceof WebGPUSchemaArray) {
+            const index = +property
+            if (isNaN(index) || index < 0 || index >= schema.length)
+              return undefined
+            pad(schema.align)
+            return createPathProxy(
+              schema.schema,
+              nextPath,
+              offset + index * schema.elementSize,
+            )
+          }
+          const fieldOffset = schema.offsets.get(property)
+          if (fieldOffset === undefined) return undefined
+          pad(schema.align)
+          return createPathProxy(
+            schema.schema[property],
+            nextPath,
+            offset + fieldOffset,
+          )
+        },
+        set(target, prop, value) {
+          if (typeof schema === 'string') {
+            const [size, align, viewIndex] = WEBGPU_SCHEMA_UNITS[schema]
+            const index = +String(prop)
+            if (isNaN(index) || index < 0 || index >= size) return false
+            pad(align)
+            target.set(viewIndex, offset + index, value)
+            return true
+          }
+          return false
+        },
+      })
     }
-  }
-
-  public remove(id: number) {
-    const index = this.idToIndex.get(id)
-    if (index === undefined) return
-    this.idToIndex.delete(id)
-    const lastId = this.indexToId.pop()!
-    if (index === this.indexToId.length) return
-    // Copy last instance into the removed slot
-    const offset = index * this.instanceSize
-    const lastOffset = this.indexToId.length * this.instanceSize
-    const updatedInstance = this.data.subarray(
-      lastOffset,
-      lastOffset + this.instanceSize,
-    )
-    this.data.set(updatedInstance, offset)
-    const end = offset + this.instanceSize
-    if (offset < this.uploadStart) this.uploadStart = offset
-    if (end > this.uploadEnd) this.uploadEnd = end
-    // Update id/index mapping
-    this.idToIndex.set(lastId, index)
-    this.indexToId[index] = lastId
-  }
-
-  public upload() {
-    if (this.uploadEnd <= this.uploadStart) return
-    device.queue.writeBuffer(
-      this.buffer,
-      this.uploadStart * 4,
-      this.data,
-      this.uploadStart,
-      this.uploadEnd - this.uploadStart,
-    )
-    this.uploadStart = Infinity
-    this.uploadEnd = 0
-  }
-
-  public getLayout(
-    offsetLocation: number,
-    instanced = false,
-  ): GPUVertexBufferLayout {
-    return {
-      arrayStride: this.instanceSize * 4,
-      attributes: this.vertexAttributes.map((x) => ({
-        format: x.format,
-        offset: x.offset,
-        shaderLocation: offsetLocation + x.shaderLocation,
-      })),
-      stepMode: instanced ? 'instance' : 'vertex',
-    }
-  }
-
-  public destroy() {
-    this.buffer.destroy()
+    this.value = createPathProxy(schema) as unknown as SchemaToValue<S>
   }
 }
+
+// type DataForAttributes<
+//   Attributes extends Record<string, keyof typeof VERTEX_UNITS>,
+// > = {
+//   [K in keyof Attributes]: number[] & {
+//     length: (typeof VERTEX_UNITS)[Attributes[K]]
+//   }
+// }
+
+// const VERTEX_UNITS = {
+//   float32: 1,
+//   float32x2: 2,
+//   float32x3: 3,
+//   float32x4: 4,
+//   uint32: 1,
+//   uint32x2: 2,
+//   uint32x3: 3,
+//   uint32x4: 4,
+//   sint32: 1,
+//   sint32x2: 2,
+//   sint32x3: 3,
+//   sint32x4: 4,
+// } as const
+// /** Currently doesn't support formats below 4 bytes */
+// export class WebGPUBufferInstances<
+//   Attributes extends Record<string, keyof typeof VERTEX_UNITS>,
+// > extends WebGPUBuffer {
+//   public readonly idToIndex = new Map<number, number>()
+//   public readonly indexToId: number[] = []
+//   public readonly instanceSize
+
+//   protected readonly vertexAttributes
+//   protected uploadStart = Infinity
+//   protected uploadEnd = 0
+
+//   public constructor(
+//     public readonly attributes: Attributes,
+//     public readonly maxInstances = 256,
+//   ) {
+//     const vertexAttributes: [number, GPUVertexFormat][] = []
+//     let offset = 0
+//     for (const key in attributes) {
+//       const format = attributes[key]!
+//       vertexAttributes.push([offset, format])
+//       offset += VERTEX_UNITS[format] * 4
+//     }
+//     const instanceSize = offset / 4
+//     super(
+//       instanceSize * maxInstances,
+//       GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+//     )
+//     this.instanceSize = instanceSize
+//     this.vertexAttributes = vertexAttributes
+//   }
+
+//   public add(id: number, instance: DataForAttributes<Attributes>) {
+//     if (this.indexToId.length === this.maxInstances)
+//       throw new Error('Max instances reached')
+//     if (this.idToIndex.has(id))
+//       throw new Error(`Instance "${id}" already exists`)
+//     let cursor = this.indexToId.length * this.instanceSize
+//     for (const name in this.attributes) {
+//       const values = instance[name]
+//       this.data.set(values, cursor)
+//       cursor += values.length
+//     }
+//     this.uploadEnd = cursor
+//     // Update id mapping
+//     this.idToIndex.set(id, this.indexToId.length)
+//     this.indexToId[this.indexToId.length] = id
+//   }
+
+//   public update(id: number, instance: Partial<DataForAttributes<Attributes>>) {
+//     const index = this.idToIndex.get(id)
+//     if (index === undefined) return
+//     const offset = index * this.instanceSize
+//     let cursor = offset
+//     for (const name in this.attributes) {
+//       const values = instance[name]
+//       if (values) {
+//         const end = values.length + cursor
+//         if (cursor < this.uploadStart) this.uploadStart = cursor
+//         if (end > this.uploadEnd) this.uploadEnd = end
+//         this.data.set(values, cursor)
+//       }
+//       cursor += VERTEX_UNITS[this.attributes[name]!] * 4
+//     }
+//   }
+
+//   public remove(id: number) {
+//     const index = this.idToIndex.get(id)
+//     if (index === undefined) return
+//     this.idToIndex.delete(id)
+//     const lastId = this.indexToId.pop()!
+//     if (index === this.indexToId.length) return
+//     // Copy last instance into the removed slot
+//     const offset = index * this.instanceSize
+//     const lastOffset = this.indexToId.length * this.instanceSize
+//     const updatedInstance = this.data.subarray(
+//       lastOffset,
+//       lastOffset + this.instanceSize,
+//     )
+//     this.data.set(updatedInstance, offset)
+//     const end = offset + this.instanceSize
+//     if (offset < this.uploadStart) this.uploadStart = offset
+//     if (end > this.uploadEnd) this.uploadEnd = end
+//     // Update id/index mapping
+//     this.idToIndex.set(lastId, index)
+//     this.indexToId[index] = lastId
+//   }
+
+//   public upload() {
+//     if (this.uploadEnd <= this.uploadStart) return
+//     device.queue.writeBuffer(
+//       this.buffer,
+//       this.uploadStart * 4,
+//       this.data,
+//       this.uploadStart,
+//       this.uploadEnd - this.uploadStart,
+//     )
+//     this.uploadStart = Infinity
+//     this.uploadEnd = 0
+//   }
+
+//   public getLayout(
+//     offsetLocation: number,
+//     instanced = false,
+//   ): GPUVertexBufferLayout {
+//     return {
+//       arrayStride: this.instanceSize * 4,
+//       attributes: this.vertexAttributes.map((x) => ({
+//         format: x.format,
+//         offset: x.offset,
+//         shaderLocation: offsetLocation + x.shaderLocation,
+//       })),
+//       stepMode: instanced ? 'instance' : 'vertex',
+//     }
+//   }
+
+//   public destroy() {
+//     this.buffer.destroy()
+//   }
+// }
