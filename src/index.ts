@@ -1,4 +1,8 @@
-import { WebGPUMemory, WebGPUSchemaArray } from './game/rendering/buffer'
+import {
+  WebGPUMemory,
+  WebGPUSchema,
+  WebGPUSchemaArray,
+} from './game/rendering/buffer'
 import './global.scss'
 // import { effect } from '@softsky/utils'
 
@@ -93,20 +97,25 @@ import './global.scss'
 // })
 
 const uniform = new WebGPUMemory(
-  {
+  new WebGPUSchema({
     pos: 'vec4u',
     arr: new WebGPUSchemaArray(
-      {
+      new WebGPUSchema({
         a: 'u32',
-        b: 'vec2f',
-      },
-      6,
+        b: 'vec4f',
+        c: 'vec4f',
+        d: 'vec4f',
+      }),
+      4096,
     ),
-  },
+  }),
   GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 )
+console.log(1, uniform.value.pos[3])
 uniform.value.pos[3] = -2
-uniform.value.arr[5].b[1] = 1
+console.log(2, uniform.value.pos[3])
+console.log(3, uniform.value.arr[5]!.b[1])
+uniform.value.arr[63999]!.b[1] = 1
 uniform.upload()
 
 // await createPipelineAndDraw()
