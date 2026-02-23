@@ -1,8 +1,8 @@
 import ECSEntity from '../../ecs/entity'
 import { ECSQuery } from '../../ecs/query'
 import { ECSFixedUpdateSystem } from '../../ecs/system'
-import Rect from '../../physics/body/rect'
-import RTree from '../../physics/rtree'
+import Rect from '../../math/body/rect'
+import RTree from '../../math/rtree'
 import { HitboxComponent } from '../components/hitbox.component'
 import { TransformComponent } from '../components/transform.component'
 import { VelocityComponent } from '../components/velocity.component'
@@ -24,7 +24,7 @@ export default class PhysicsSystem extends ECSFixedUpdateSystem {
 
   public fixedUpdate() {
     this.updateDeleted()
-    for (const entity of this.entities$.matches) {
+    for (const entity of this.entities$.entities) {
       const velocityComponent = entity.components.get(VelocityComponent)
       // Update entites with not zero velocity, that have tag to explicit update or simply new
       if (
@@ -65,7 +65,7 @@ export default class PhysicsSystem extends ECSFixedUpdateSystem {
       }
     }
     this.lastEntities.clear()
-    for (const entity of this.entities$.matches) this.lastEntities.add(entity)
+    for (const entity of this.entities$.entities) this.lastEntities.add(entity)
   }
 
   protected updateEntityComponents(
@@ -119,7 +119,7 @@ export default class PhysicsSystem extends ECSFixedUpdateSystem {
   protected updateDeleted() {
     for (const entity of this.lastEntities) {
       // Difference function is slower than just this check
-      if (this.entities$.matches.has(entity)) continue
+      if (this.entities$.entities.has(entity)) continue
       const hitboxComponent = entity.components.get(HitboxComponent)
       if (hitboxComponent?.data.rect) {
         this.rectHitbox.delete(hitboxComponent.data.rect)

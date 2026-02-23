@@ -1,4 +1,4 @@
-import { Base, Constructor } from '@softsky/utils'
+import { Constructor } from '@softsky/utils'
 
 import ECSEntity from './entity'
 
@@ -8,6 +8,7 @@ export type ECSComponentExport<T = any> = {
   created: number
   data: T
 }
+
 /**
  * Components must only include state and no other logic.
  * This state must be parseable to JSON and from it,
@@ -15,20 +16,21 @@ export type ECSComponentExport<T = any> = {
  *
  * Upon creation ECSQueries are updated and the entity
  * you added this component to may now be queried by it.
+ *
+ * Don't forget to register to world when extending this class:
+ * @example
+ * static {
+ *   world.registerComponentType(MyComponent)
+ * }
  */
-export default class ECSComponent<T = any> extends Base {
-  static {
-    this.registerSubclass()
-  }
-  /**
-   * If using references please save component version.
-   * If version has changed it means it's no longer same component.
-   */
-  public version = 1
+export default class ECSComponent<T = any> {
+  public id: number
   /** Game time of creation. It's late by 1 tick */
   public created = 0
   /** Is component registered and can be queued */
   public registered = false
+
+  protected readonly updatedSet
 
   public constructor(
     public entity: ECSEntity,
@@ -36,7 +38,11 @@ export default class ECSComponent<T = any> extends Base {
     /** If set component won't register automatically */
     id?: number,
   ) {
-    super(id)
+    this.updatedSet = this.entity.world.updatedComponents.get(
+      this.constructor as Constructor<ECSComponent>,
+    )!
+    this.id = id ?? ++entity.world.lastComponentId
+    entity.world.componentIdMap.set(this.id, this)
     this.created = this.entity.world.time
     if (!id) this.register()
   }
@@ -53,6 +59,7 @@ export default class ECSComponent<T = any> extends Base {
       this.entity.components.set(constructor, this)
       if (this.entity.registered) this.entity.addQueueChange([constructor])
       this.registered = true
+      this.markUpdated(true)
     } else
       this.entity.world.beforeNextQueueUpdate.push(
         this.register.bind(this, true),
@@ -69,10 +76,23 @@ export default class ECSComponent<T = any> extends Base {
       const constructor = this.constructor as Constructor<ECSComponent>
       this.entity.components.delete(constructor)
       this.entity.addQueueChange([constructor])
-      Base.idMap.delete(this.id)
+      this.entity.world.componentIdMap.delete(this.id)
       this.registered = false
-      this.version++
+      this.markUpdated(true)
     } else
+      this.entity.world.beforeNextQueueUpdate.push(
+        this.destroy.bind(this, true),
+      )
+  }
+
+  /**
+   * Call this after data update.
+   *
+   * Deferred until next tick unless immediate specified.
+   */
+  public markUpdated(immediately?: boolean) {
+    if (immediately) this.updatedSet.add(this)
+    else
       this.entity.world.beforeNextQueueUpdate.push(
         this.destroy.bind(this, true),
       )

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { signal, UUID } from '@softsky/utils'
 
-import Vector2 from './physics/body/vector2'
+import Vector2 from './math/body/vector2'
 
 export type Device = {
   motion?: [number, number, number]

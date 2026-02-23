@@ -8,10 +8,7 @@ export default class Vector2 implements IPhysicsBody {
     public y = 0,
   ) {}
 
-  public center() {
-    return this
-  }
-
+  // === Mutations ===
   public rotate(angle: number, pivot = new Vector2()): PhysicsBody {
     const cos = Math.cos(angle)
     const sin = Math.sin(angle)
@@ -72,9 +69,30 @@ export default class Vector2 implements IPhysicsBody {
     return this
   }
 
+  public center() {
+    return this
+  }
+
+  // === Default ===
+
+  public toString() {
+    return `Vector2<${this.x},${this.y}>`
+  }
+
+  public *[Symbol.iterator](): Generator<number> {
+    yield this.x
+    yield this.y
+  }
+
+  public equals(v: Vector2) {
+    return this.x === v.x && this.y === v.y
+  }
+
   public clone() {
     return new Vector2(this.x, this.y)
   }
+
+  // === Other ===
 
   public distance(v?: Vector2) {
     if (v) {
@@ -85,6 +103,7 @@ export default class Vector2 implements IPhysicsBody {
     return Math.sqrt(this.x * this.x + this.y * this.y)
   }
 
+  /** Get angle of this vector, or between other vector */
   public angle(v?: Vector2, radian?: boolean) {
     const angle = v
       ? Math.atan2(this.x * v.y - this.y * v.x, this.x * v.x + this.y * v.y)
@@ -114,16 +133,13 @@ export default class Vector2 implements IPhysicsBody {
     return this
   }
 
-  public equals(v: Vector2) {
-    return this.x === v.x && this.y === v.y
+  public dot(v: Vector2): number {
+    return this.x * v.x + this.y * v.y
   }
 
-  public toString() {
-    return `Vector2<${this.x},${this.y}>`
-  }
-
-  public *[Symbol.iterator](): Generator<number> {
-    yield this.x
-    yield this.y
+  public lerp(v: Vector2, t: number): this {
+    this.x = (v.x - this.x) * t
+    this.y = (v.y - this.y) * t
+    return this
   }
 }

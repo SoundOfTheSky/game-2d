@@ -12,7 +12,7 @@ export default class DebugSystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.queue.matches) {
+    for (const entity of this.queue.entities) {
       console.log(entity)
     }
   }

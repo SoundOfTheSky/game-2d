@@ -1,6 +1,6 @@
 import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
-import Vector2 from '../../physics/body/vector2'
+import Vector2 from '../../math/body/vector2'
 import {
   AnimationComponent,
   AnimationFrame,
@@ -18,7 +18,7 @@ export class AnimationSystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.queue.matches) {
+    for (const entity of this.queue.entities) {
       const animatedComponent = entity.components.get(AnimationComponent)!
       const renderableComponent =
         entity.components.get(RenderableComponent) ??

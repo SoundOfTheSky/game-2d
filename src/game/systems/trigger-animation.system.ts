@@ -21,7 +21,7 @@ export default class TriggerAnimationSystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.moveAnimation$.matches) {
+    for (const entity of this.moveAnimation$.entities) {
       const animatedComponent = entity.components.get(AnimationComponent)!
       const velocityComponent = entity.components.get(VelocityComponent)!
       let intendedAnim = 'idle'

@@ -22,31 +22,31 @@ describe('ecs', () => {
     shouldAdd = true,
   ) {
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(false)
+    expect(query.entities.has(entity)).toBe(false)
     expect(query.deleted.has(entity)).toBe(false)
     const components = constructors.map((c) => new c(entity, 1))
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(false)
+    expect(query.entities.has(entity)).toBe(false)
     expect(query.deleted.has(entity)).toBe(false)
     query.world.tick(16.6)
     expect(query.added.has(entity)).toBe(shouldAdd)
-    expect(query.matches.has(entity)).toBe(shouldAdd)
+    expect(query.entities.has(entity)).toBe(shouldAdd)
     expect(query.deleted.has(entity)).toBe(false)
     query.world.tick(16.6)
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(shouldAdd)
+    expect(query.entities.has(entity)).toBe(shouldAdd)
     expect(query.deleted.has(entity)).toBe(false)
     for (const component of components) component.destroy()
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(shouldAdd)
+    expect(query.entities.has(entity)).toBe(shouldAdd)
     expect(query.deleted.has(entity)).toBe(false)
     query.world.tick(16.6)
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(false)
+    expect(query.entities.has(entity)).toBe(false)
     expect(query.deleted.has(entity)).toBe(shouldAdd)
     query.world.tick(16.6)
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(false)
+    expect(query.entities.has(entity)).toBe(false)
     expect(query.deleted.has(entity)).toBe(false)
   }
 
@@ -54,27 +54,27 @@ describe('ecs', () => {
     const world = new ECSWorld()
     const query = new ECSQuery(world, [NumberComponent])
     world.tick(17)
-    expect(query.matches.size).toBe(0)
+    expect(query.entities.size).toBe(0)
     const entity = new ECSEntity(world)
     world.tick(17 * 2)
-    expect(query.matches.size).toBe(0)
+    expect(query.entities.size).toBe(0)
     const sC = new StringComponent(entity, 'abc')
     world.tick(17 * 4)
-    expect(query.matches.size).toBe(0)
+    expect(query.entities.size).toBe(0)
     const nC = new NumberComponent(entity, 123)
     world.tick(17 * 5)
     expect(query.added.has(entity)).toBe(true)
-    expect(query.matches.has(entity)).toBe(true)
+    expect(query.entities.has(entity)).toBe(true)
     expect(query.deleted.has(entity)).toBe(false)
     sC.destroy()
     world.tick(17 * 6)
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(true)
+    expect(query.entities.has(entity)).toBe(true)
     expect(query.deleted.has(entity)).toBe(false)
     nC.destroy()
     world.tick(17 * 6)
     expect(query.added.has(entity)).toBe(false)
-    expect(query.matches.has(entity)).toBe(false)
+    expect(query.entities.has(entity)).toBe(false)
     expect(query.deleted.has(entity)).toBe(true)
   })
 
@@ -121,22 +121,6 @@ describe('ecs', () => {
         !combination.includes(B) &&
           !combination.includes(C) &&
           combination.length !== 0,
-      )
-  })
-  it('Query, one', () => {
-    const world = new ECSWorld()
-    const entity = new ECSEntity(world)
-    const query = new ECSQuery(world, {
-      one: [B, C],
-    })
-    for (const combination of COMBINATIONS)
-      testQuery(
-        query,
-        entity,
-        combination,
-        (combination.includes(B) ? 1 : 0) +
-          (combination.includes(C) ? 1 : 0) ===
-          1,
       )
   })
 })

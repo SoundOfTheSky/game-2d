@@ -4,13 +4,17 @@ import ECSEntity from '../../ecs/entity'
 
 export type ParentComponentData = {
   entity: ECSEntity
-  version: number
+  previous?: ECSEntity
 }
 export class ParentComponent extends ECSComponent<ParentComponentData> {
   public constructor(world: ECSEntity, entity: ECSEntity) {
     super(world, {
       entity,
-      version: entity.version,
     })
+  }
+
+  public setNewParent(entity: ECSEntity) {
+    this.data.previous = this.data.entity
+    this.data.entity = entity
   }
 }

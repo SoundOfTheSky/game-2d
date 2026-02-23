@@ -17,7 +17,6 @@ export class ECSSystem {
   }
 
   /** Function that will be called every tick */
-
   public tick(): void {}
 
   public destroy() {

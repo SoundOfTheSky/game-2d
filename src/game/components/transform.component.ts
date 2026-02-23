@@ -1,23 +1,15 @@
 import ECSComponent from '@/ecs/component'
-
-import ECSEntity from '../../ecs/entity'
-import Vector2 from '../../physics/body/vector2'
+import { Vector3 } from '@/math/vector3'
 
 import { ParentComponent } from './parent.component'
 
 export type TransformComponentData = {
-  position: Vector2
-  scale?: number
+  position: Vector3
+  scale?: Vector3
   rotation?: number
+  pivotRotation?: number
+  matrix?: number
 }
-export class TransformComponent extends ECSComponent<TransformComponentData> {
-  public constructor(
-    entity: ECSEntity,
-    data: Partial<TransformComponentData> = {},
-  ) {
-    data.position ??= new Vector2()
-    super(entity, data as TransformComponentData)
-  }
-}
+export class TransformComponent extends ECSComponent<TransformComponentData> {}
 
 export class TransformParentComponent extends ParentComponent {}

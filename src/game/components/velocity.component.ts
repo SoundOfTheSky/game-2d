@@ -1,7 +1,7 @@
 import ECSComponent from '@/ecs/component'
 
 import ECSEntity from '../../ecs/entity'
-import Vector2 from '../../physics/body/vector2'
+import Vector2 from '../../math/body/vector2'
 
 export type VelocityComponentData = {
   velocity: Vector2
