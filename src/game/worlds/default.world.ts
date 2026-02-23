@@ -5,9 +5,9 @@ import { AnimationSystem } from '../systems/animation.system'
 import DestroySystem from '../systems/destroy.system'
 import { InputSystem } from '../systems/input.system'
 import MapSystem from '../systems/map.system'
-import ParentSystem from '../systems/parent.system'
+import HierarchySystem from '../systems/hierarchy.system'
 import PhysicsSystem from '../systems/physics.system'
-import { RenderSystem } from '../systems/render.system'
+import { RenderSystem } from '../systems/transform.system'
 import { StreamingSystem } from '../systems/streaming.system'
 import TransformSystem from '../systems/transform.system'
 import TriggerAnimationSystem from '../systems/trigger-animation.system'
@@ -24,7 +24,7 @@ export default class DefaultWorld extends ECSWorld {
     new StreamingSystem(this)
     new InputSystem(this)
     new TransformSystem(this)
-    new ParentSystem(this)
+    new HierarchySystem(this)
     new RenderSystem(this)
     new AnimationSystem(this)
     // new EffectsSystem(this)

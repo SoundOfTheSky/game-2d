@@ -1,6 +1,6 @@
 import ECSEntity from '../../ecs/entity'
-import Circle from '../../physics/body/circle'
-import Vector2 from '../../physics/body/vector2'
+import Circle from '../../math/body/circle'
+import Vector2 from '../../math/body/vector2'
 import { AnimationComponent } from '../components/animated.component'
 import { HitboxComponent } from '../components/hitbox.component'
 import { HPComponent } from '../components/hp.component'

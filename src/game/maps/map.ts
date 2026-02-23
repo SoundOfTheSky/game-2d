@@ -1,4 +1,4 @@
-import Vector2 from '../../physics/body/vector2'
+import Vector2 from '../../math/body/vector2'
 import createPlayer from '../entities/player.entity'
 import MapSystem, { TiledMap, TyledObjectLayer } from '../systems/map.system'
 import { StreamingSystem } from '../systems/streaming.system'

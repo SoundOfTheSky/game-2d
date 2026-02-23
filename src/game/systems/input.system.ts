@@ -2,7 +2,7 @@ import { room, RoomMain } from '@/room'
 
 import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
-import Vector2 from '../../physics/body/vector2'
+import Vector2 from '../../math/body/vector2'
 import { InputComponent } from '../components/input.component'
 import { VelocityComponent } from '../components/velocity.component'
 
@@ -116,7 +116,7 @@ export class InputSystem extends ECSSystem {
     }
 
     // Apply move to entities
-    for (const entity of this.entities$.matches) {
+    for (const entity of this.entities$.entities) {
       const inputComponent = entity.components.get(InputComponent)!
       const velocityComponent = entity.components.get(VelocityComponent)
       // Vectors to movement

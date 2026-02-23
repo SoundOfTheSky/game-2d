@@ -1,11 +1,11 @@
 import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
-import Vector2 from '../../physics/body/vector2'
+import Vector2 from '../../math/body/vector2'
 import {
   AnimationComponent,
   AnimationFrame,
 } from '../components/animated.component'
-import { RenderableComponent } from '../components/renderable.component'
+import { RenderComponent } from '../components/render.component'
 import DefaultWorld from '../worlds/default.world'
 
 export class AnimationSystem extends ECSSystem {
@@ -18,11 +18,11 @@ export class AnimationSystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.queue.matches) {
+    for (const entity of this.queue.entities) {
       const animatedComponent = entity.components.get(AnimationComponent)!
       const renderableComponent =
-        entity.components.get(RenderableComponent) ??
-        new RenderableComponent(entity, {
+        entity.components.get(RenderComponent) ??
+        new RenderComponent(entity, {
           source: animatedComponent.data.frames[0]!.source!,
           offset: animatedComponent.data.frames[0]!.offset,
           size: animatedComponent.data.frames[0]!.size,

@@ -1,6 +1,12 @@
 import { WebGPUBufferDataType } from './buffer'
-
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+
+/**
+ * - How many numbers it takes. 1 = 4 bytes.
+ * - Alignment. 1 = 4 bytes.
+ * - The WebGPUBufferDataType to use for this unit.
+ * - Vertex data format analog. May be undefined for matrices.
+ */
 export const WEBGPU_SCHEMA_UNITS = {
   i32: [1, 1, WebGPUBufferDataType.INT, 'sint32'],
   u32: [1, 1, WebGPUBufferDataType.UINT, 'uint32'],

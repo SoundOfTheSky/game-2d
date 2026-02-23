@@ -4,7 +4,7 @@ import ECSComponent from '@/ecs/component'
 
 import ECSEntity from '../../ecs/entity'
 
-import { Renderable } from './renderable.component'
+import { Renderable } from './render.component'
 
 export type AnimationFrame = Partial<Renderable> & {
   onDraw?: () => unknown

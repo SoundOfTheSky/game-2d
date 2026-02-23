@@ -14,7 +14,7 @@ export default class HPSystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.queue.matches) {
+    for (const entity of this.queue.entities) {
       const hpComponent = entity.components.get(HPComponent)!
       if (
         hpComponent.data.regen &&

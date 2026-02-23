@@ -1,8 +1,8 @@
 import ECSComponent from '@/ecs/component'
 
-import { PhysicsBody } from '../../physics/body'
-import Rect from '../../physics/body/rect'
-import Vector2 from '../../physics/body/vector2'
+import { PhysicsBody } from '../../math/body'
+import Rect from '../../math/body/rect'
+import Vector2 from '../../math/body/vector2'
 
 export type HitboxComponentData = {
   body: PhysicsBody

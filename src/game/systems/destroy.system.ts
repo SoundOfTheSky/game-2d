@@ -13,7 +13,7 @@ export default class DestroySystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.queue$.matches) {
+    for (const entity of this.queue$.entities) {
       const destroyComponent = entity.components.get(DestroyComponent)!
       if (
         (destroyComponent.data.time &&

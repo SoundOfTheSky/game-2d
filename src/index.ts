@@ -1,8 +1,4 @@
-import {
-  WebGPUMemory,
-  WebGPUSchema,
-  WebGPUSchemaArray,
-} from './game/rendering/buffer'
+import { dynamicAtlas16, packTileId } from './rendering/dynamic-atlas'
 import './global.scss'
 // import { effect } from '@softsky/utils'
 
@@ -96,29 +92,38 @@ import './global.scss'
 //   opacity: [1],
 // })
 
-const uniform = new WebGPUMemory(
-  new WebGPUSchema({
-    pos: 'vec4u',
-    arr: new WebGPUSchemaArray(
-      new WebGPUSchema({
-        a: 'u32',
-        b: 'vec4f',
-        c: 'vec4f',
-        d: 'vec4f',
-      }),
-      4096,
-    ),
-  }),
-  GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-)
-console.log(1, uniform.value.pos[3])
-uniform.value.pos[3] = -2
-console.log(2, uniform.value.pos[3])
-console.log(3, uniform.value.arr[5]!.b[1])
-uniform.value.arr[63999]!.b[1] = 1
-uniform.upload()
+// const uniform = new WebGPUMemoryLastArray(
+//   new WebGPUSchema({
+//     pos: 'vec4u',
+//     arr: new WebGPUSchemaArray(
+//       new WebGPUSchema({
+//         a: 'u32',
+//         b: 'vec4f',
+//         c: 'vec4f',
+//         d: 'vec4f',
+//       }),
+//       4096,
+//     ),
+//   }),
+//   GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+// )
+// uniform.array
+// console.log(1, uniform.value.pos[3])
+// uniform.value.pos[3] = -2
+// console.log(2, uniform.value.pos[3])
+// console.log(3, uniform.value.arr[5]!.b[1])
+// uniform.value.arr[63999]!.b[1] = 1
+// uniform.upload()
 
 // await createPipelineAndDraw()
+
+console.log(dynamicAtlas16)
+for (let index = 0; index < dynamicAtlas16.tilesets.length; index++) {
+  const tileset = dynamicAtlas16.tilesets[index]!
+  for (let x = 0; x < tileset.naturalWidth / 16; x++)
+    for (let y = 0; y < tileset.naturalHeight / 16; y++)
+      dynamicAtlas16.useTile(packTileId(index, x, y))
+}
 
 declare global {
   function setTimeout<TArguments extends unknown[]>(

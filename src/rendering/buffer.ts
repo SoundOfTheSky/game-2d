@@ -6,7 +6,11 @@ export enum WebGPUBufferDataType {
   UINT = 'uintData',
 }
 
-/** Currently doesn't support formats below 4 bytes */
+/**
+ * Create WebGPUBuffer with upload functionality.
+ *
+ * You probably want to use WebGPUVertex or WebGPUMemory whose instead this class.
+ */
 export class WebGPUBuffer {
   public readonly buffer
 
@@ -35,7 +39,13 @@ export class WebGPUBuffer {
 
   public upload() {
     if (this.uploadEnd <= this.uploadStart) return
-    console.log('webgpubuffer upload', this.uploadStart, this.uploadEnd)
+    console.log(
+      'webgpubuffer upload',
+      this.uploadEnd - this.uploadStart,
+      'bytes',
+      this.uploadStart,
+      this.uploadEnd,
+    )
     this.uploadStart *= 4
     this.uploadEnd *= 4
     device.queue.writeBuffer(
@@ -49,7 +59,7 @@ export class WebGPUBuffer {
     this.uploadEnd = 0
   }
 
-  /** Recommended to use this instad */
+  /** Recommended to use this instead */
   public set(
     view: WebGPUBufferDataType,
     dataIndex: number,
