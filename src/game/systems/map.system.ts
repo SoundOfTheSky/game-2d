@@ -1,18 +1,18 @@
 import ECSEntity from '../../ecs/entity'
 import { ECSSystem } from '../../ecs/system'
-import { PhysicsBody } from '../../physics/body'
-import Circle from '../../physics/body/circle'
-import Line from '../../physics/body/line'
-import Poly from '../../physics/body/poly'
-import Rect from '../../physics/body/rect'
-import Vector2 from '../../physics/body/vector2'
+import { PhysicsBody } from '../../math/body'
+import Circle from '../../math/body/circle'
+import Line from '../../math/body/line'
+import Poly from '../../math/body/poly'
+import Rect from '../../math/body/rect'
+import Vector2 from '../../math/body/vector2'
 import { HitboxComponent } from '../components/hitbox.component'
-import { RenderableComponent } from '../components/renderable.component'
+import { RenderComponent } from '../components/render.component'
 import { TransformComponent } from '../components/transform.component'
 import { initCanvas } from '../utils/canvas'
 import DefaultWorld from '../worlds/default.world'
 
-import { RenderSystem } from './render.system'
+import { RenderSystem } from './transform.system'
 
 export type TiledMap = {
   width: number // tiles
@@ -85,7 +85,7 @@ export default class MapSystem extends ECSSystem {
       if (layer.type !== 'tilelayer') break
       const entity = new ECSEntity(this.world)
       const canvas = document.createElement('canvas')
-      new RenderableComponent(entity, {
+      new RenderComponent(entity, {
         source: canvas,
         size: new Vector2(width, height),
         // Render first 3 layers on background, all next layer topmost

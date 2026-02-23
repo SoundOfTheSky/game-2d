@@ -13,7 +13,7 @@ export default class EffectsSystem extends ECSSystem {
   }
 
   public tick(): void {
-    for (const entity of this.queue.matches) {
+    for (const entity of this.queue.entities) {
       const effectsComponent = entity.components.get(EffectsComponent)!
       for (let index = 0; index < effectsComponent.data.length; index++)
         effectsComponent.data[index]!.tick()

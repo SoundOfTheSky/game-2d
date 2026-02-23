@@ -1,14 +1,12 @@
-import { Base, Constructor } from '@softsky/utils'
+import { Constructor } from '@softsky/utils'
 
 import ECSComponent, { ECSComponentExport } from './component'
-import ECSEntityPool from './entity-pool'
 import { ECSComponentFilter } from './query'
 import ECSWorld from './world'
 
 export type ECSEntityExport = {
   className: string
   id: number
-  version: number
   created: number
   tags: string[]
   components: ECSComponentExport[]
@@ -23,14 +21,15 @@ export type ECSEntityExport = {
  * will start updating you ECSEntity.
  *
  * Also can include tags, which basically work as components without state.
+ *
+ * Don't forget to add when extending this class:
+ * @example
+ * static {
+ *   world.registerEntityType(MyEntity)
+ * }
  */
-export default class ECSEntity extends Base {
-  static {
-    this.registerSubclass()
-  }
-
-  /** Is increased on deletion, so if reused, we can check it's not the same */
-  public version = 1
+export default class ECSEntity {
+  public id: number
   public created
   public registered = false
   /** Do not set or or remove tags directly unless sure */
@@ -42,13 +41,13 @@ export default class ECSEntity extends Base {
   > & {
     get<T, C extends ECSComponent<T>>(key: Constructor<C>): C | undefined
   } = new Map()
-  public pool?: ECSEntityPool
 
   public constructor(
     public readonly world: ECSWorld,
     id?: number,
   ) {
-    super(id)
+    this.id = id ?? ++world.lastEntityId
+    world.entityIdMap.set(this.id, this)
     this.created = world.time
     if (!id) this.register()
   }
@@ -74,9 +73,9 @@ export default class ECSEntity extends Base {
 
   /** Check if has component OR filter */
   public has(component: ECSComponentFilter) {
-    return typeof component === 'function'
-      ? this.components.has(component)
-      : this.tags.has(component)
+    return typeof component === 'string'
+      ? this.tags.has(component)
+      : this.components.has(component)
   }
 
   /**
@@ -116,13 +115,9 @@ export default class ECSEntity extends Base {
     if (immediately) {
       const index = this.world.entities.indexOf(this)
       if (index !== -1) this.world.entities.splice(index, 1)
-      this.version++
       this.registered = false
-      if (this.pool) this.pool.returnEntityToPoolAndUpdateQueries(this)
-      else {
-        this.world.queueUpdates.set(this, undefined)
-        ECSEntity.idMap.delete(this.id)
-      }
+      this.world.queueUpdates.set(this, undefined)
+      this.world.entityIdMap.delete(this.id)
     } else this.world.beforeNextQueueUpdate.push(this.destroy.bind(this, true))
   }
 
@@ -132,7 +127,6 @@ export default class ECSEntity extends Base {
       id: this.id,
       created: this.created,
       tags: [...this.tags],
-      version: this.version,
       components: [...this.components.values()].map((x) => x.toJSON()),
     }
   }
@@ -140,23 +134,22 @@ export default class ECSEntity extends Base {
   public static fromJSON(world: ECSWorld, data: ECSEntityExport) {
     const entity = new this(world)
     entity.created = data.created
-    entity.version = data.version
     entity.tags = new Set(...data.tags)
     for (let index = 0; index < data.components.length; index++) {
       const componentData = data.components[index]!
       ;(
-        Base.subclasses.get(componentData.className) as typeof ECSComponent
+        world.componentConstructorMap.get(
+          componentData.className,
+        ) as typeof ECSComponent
       ).fromJSON(entity, componentData)
     }
     return entity
   }
 
   /** Automatically called on changes to queue. Don't call */
-  public addQueueChange(changes?: ECSComponentFilter[]) {
-    if (changes) {
-      const update = this.world.queueUpdates.get(this)
-      if (update) update.push(...changes)
-      else this.world.queueUpdates.set(this, changes)
-    } else this.world.queueUpdates.set(this, undefined)
+  public addQueueChange(changes: ECSComponentFilter[]) {
+    const update = this.world.queueUpdates.get(this)
+    if (update) update.push(...changes)
+    else this.world.queueUpdates.set(this, changes)
   }
 }

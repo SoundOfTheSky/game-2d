@@ -1,6 +1,14 @@
-import Rect from './body/rect'
-import Vector2 from './body/vector2'
+import Rect from './rect'
+import Vector2 from './vector2'
 
+/**
+ * Creates a simple 2d lookup.
+ * You simply `push` your Rect, and then search usig another.
+ * If any rect in tree intersects with one you're searching for, it'll be in result.
+ *
+ * Mostly used for collision. We generate rect for every body
+ * and calculate precise collision checks for found in Rtree bodies.
+ */
 export default class RTree {
   public rect: Rect
   public children: RTree[]
@@ -89,7 +97,6 @@ export default class RTree {
   }
 
   protected chooseSubtree(rect: Rect) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: RTree = this
     while (!node.leaf) {
       let best = node.children[0]!
@@ -236,7 +243,6 @@ export default class RTree {
   }
 
   protected condense() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: RTree = this
     while (true) {
       if (node.children.length === 0 && node.parent) {

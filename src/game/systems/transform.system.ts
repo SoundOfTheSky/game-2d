@@ -1,74 +1,67 @@
-import { ECSQuery } from '../../ecs/query'
 import { ECSSystem } from '../../ecs/system'
+import { ChildrenComponent } from '../components/children.component'
 import { ParentComponent } from '../components/parent.component'
-import {
-  TransformComponent,
-  TransformComponentData,
-  TransformParentComponent,
-} from '../components/transform.component'
-import DefaultWorld from '../worlds/default.world'
+import { TransformComponent } from '../components/transform.component'
+
+import { SystemPriority } from './system-priority.enum'
 
 export default class TransformSystem extends ECSSystem {
-  declare public world: DefaultWorld
-  public priority = 99
-  public queue
-  protected offsetMap = new Map<ParentComponent, TransformComponentData>()
+  public override priority = SystemPriority.Transform
 
-  public constructor(world: DefaultWorld) {
-    super(world)
-    this.queue = new ECSQuery(world, {
-      all: [TransformComponent],
-      any: [TransformParentComponent, ParentComponent],
-    })
-  }
+  public updatedTransformComponents =
+    this.world.updatedComponents.get(TransformComponent)!
 
   public tick(): void {
-    for (const entity of this.queue.deleted)
-      this.offsetMap.delete(
-        entity.components.get(TransformParentComponent) ??
-          entity.components.get(ParentComponent)!,
-      )
-    for (const entity of this.queue.matches) {
-      const transformComponent = entity.components.get(TransformComponent)!
-      const parentComponent =
-        entity.components.get(TransformParentComponent) ??
-        entity.components.get(ParentComponent)!
-      const parentTransformComponent =
-        parentComponent.data.entity.components.get(TransformComponent)!
-      if (this.queue.added.has(entity)) {
-        const data: TransformComponentData = {
-          position: transformComponent.data.position
-            .clone()
-            .subtract(parentTransformComponent.data.position),
+    const toProcess: TransformComponent[] = []
+
+    // Find roots of updated transform trees
+    for (const transformComponent of this.updatedTransformComponents) {
+      let p: TransformComponent | undefined =
+        transformComponent.entity.components
+          .get(ParentComponent)
+          ?.data.entity.components.get(TransformComponent)
+      let process = true
+      while (p) {
+        if (this.updatedTransformComponents.has(p)) {
+          process = false
+          break
         }
-        if (
-          parentTransformComponent.data.rotation ||
-          transformComponent.data.rotation
-        )
-          data.rotation =
-            (transformComponent.data.rotation ?? 0) -
-            (parentTransformComponent.data.rotation ?? 0)
-        if (
-          transformComponent.data.scale ||
-          parentTransformComponent.data.scale
-        )
-          data.scale =
-            (transformComponent.data.scale ?? 1) -
-            (parentTransformComponent.data.scale ?? 1)
-        this.offsetMap.set(parentComponent, data)
-      } else {
-        const offset = this.offsetMap.get(parentComponent)!
-        transformComponent.data.position.x =
-          parentTransformComponent.data.position.x + offset.position.x
-        transformComponent.data.position.y =
-          parentTransformComponent.data.position.y + offset.position.y
-        if (offset.rotation)
-          transformComponent.data.rotation =
-            (parentTransformComponent.data.rotation ?? 0) + offset.rotation
-        if (offset.scale)
-          transformComponent.data.scale =
-            (parentTransformComponent.data.scale ?? 1) + offset.scale
+        p = transformComponent.entity.components
+          .get(ParentComponent)
+          ?.data.entity.components.get(TransformComponent)
       }
+      if (process) toProcess.push(transformComponent)
+    }
+
+    // Process transform trees
+    for (let index = 0; index < toProcess.length; index++) {
+      const transformComponent = toProcess[index]!
+      const parentTransformComponent = transformComponent.entity.components
+        .get(ParentComponent)
+        ?.data.entity.components.get(TransformComponent)
+      const m = transformComponent.data.matrix
+
+      // Get initial matrix from parent if exists
+      if (parentTransformComponent) m.copy(parentTransformComponent.data.matrix)
+      else m.identity()
+
+      // Apply transforms
+      if (transformComponent.data.rotation)
+        m.rotateZ(transformComponent.data.rotation)
+      if (transformComponent.data.scale) m.scale(transformComponent.data.scale)
+      m.translate(transformComponent.data.position)
+      if (transformComponent.data.pivotRotation)
+        m.rotateZ(transformComponent.data.pivotRotation)
+
+      // Append children to process list
+      const childrenComponent =
+        transformComponent.entity.components.get(ChildrenComponent)
+      if (childrenComponent)
+        for (const child of childrenComponent.data) {
+          const childTransformComponent =
+            child.components.get(TransformComponent)
+          if (childTransformComponent) toProcess.push(childTransformComponent)
+        }
     }
   }
 }

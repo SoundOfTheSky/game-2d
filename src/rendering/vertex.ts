@@ -13,7 +13,27 @@ type DataForAttributes<
   }
 }
 
-/** Currently doesn't support formats below 4 bytes */
+/**
+ * Create WebGPU vertex buffer with given attributes.
+ *
+ * Please be aware that data is stored contiguously in memory according to the schema,
+ * and changing values in different parts will lead to re-upload of everything in between.
+ *
+ * @example
+ * const vertexBuffer = new WebGPUVertex({
+ *   position: 'vec3',
+ *   color: 'vec4',
+ * }, 1000) // Max 1000 instances
+ * vertexBuffer.add(1, {
+ *   position: [0, 0, 0],
+ *   color: [1, 0, 0, 1],
+ * })
+ * vertexBuffer.update(1, {
+ *   position: [1, 1, 1],
+ * })
+ * vertexBuffer.remove(1)
+ * vertexBuffer.upload() // Upload changed data to GPU
+ */
 export class WebGPUVertex<
   Attributes extends Record<string, WebGPUSchemaUnitsKeys>,
 > extends WebGPUBuffer {
@@ -25,7 +45,8 @@ export class WebGPUVertex<
 
   public constructor(
     public readonly attributes: Attributes,
-    public readonly maxInstances: number,
+    public instanceMode = false,
+    public readonly maxInstances = 1,
   ) {
     const vertexAttributes: [number, GPUVertexFormat][] = []
     let offset = 0
@@ -89,11 +110,10 @@ export class WebGPUVertex<
     const offset = index * this.instanceSize
     const lastOffset = this.indexToId.length * this.instanceSize
     // Doesn't matter what type of data we use
-    const updatedInstance = this.intData.subarray(
-      lastOffset,
-      lastOffset + this.instanceSize,
+    this.intData.set(
+      this.intData.subarray(lastOffset, lastOffset + this.instanceSize),
+      offset,
     )
-    this.intData.set(updatedInstance, offset)
     const end = offset + this.instanceSize
     if (offset < this.uploadStart) this.uploadStart = offset
     if (end > this.uploadEnd) this.uploadEnd = end
@@ -102,10 +122,7 @@ export class WebGPUVertex<
     this.indexToId[index] = lastId
   }
 
-  public getLayout(
-    offsetLocation: number,
-    instanced = false,
-  ): GPUVertexBufferLayout {
+  public getLayout(offsetLocation = 0) {
     return {
       arrayStride: this.instanceSize * 4,
       attributes: this.vertexAttributes.map(([offset, format], index) => ({
@@ -113,7 +130,7 @@ export class WebGPUVertex<
         offset: offset,
         shaderLocation: offsetLocation + index,
       })),
-      stepMode: instanced ? 'instance' : 'vertex',
+      stepMode: this.instanceMode ? ('instance' as const) : ('vertex' as const),
     }
   }
 }

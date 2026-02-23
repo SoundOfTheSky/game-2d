@@ -1,4 +1,4 @@
-import { RenderSystem } from '../systems/render.system'
+import { RenderSystem } from '../systems/transform.system'
 import DefaultWorld from '../worlds/default.world'
 
 import Map from './map'

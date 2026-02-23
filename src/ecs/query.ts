@@ -6,7 +6,7 @@ import ECSWorld from './world'
 
 export type ECSComponentFilter = Constructor<ECSComponent> | string
 
-const types = ['all', 'any', 'not', 'one', 'customSubscription'] as const
+const types = ['all', 'any', 'not', 'customSubscription'] as const
 
 /**
  * ECSQueries will help you find ECSEntities in a world based on filters.
@@ -26,17 +26,15 @@ export class ECSQuery {
   /** Subscribe to changes to revaluate. Do not modify! */
   public subscriptions = new Set<ECSComponentFilter>()
   /** Entities that pass all checks */
-  public matches = new Set<ECSEntity>()
-  /** Entities thate were just added */
+  public entities = new Set<ECSEntity>()
+  /** Entities that were just added */
   public added = new Set<ECSEntity>()
-  /** Entities thate were just deleted */
+  /** Entities that were just deleted */
   public deleted = new Set<ECSEntity>()
   /** Find entities with all of these. Same as creating with array. */
   public all?: ECSComponentFilter[]
   /** Find entities with at least on of those */
   public any?: ECSComponentFilter[]
-  /** Find entities with ONLY ONE of those. */
-  public one?: ECSComponentFilter[]
   /** Find entities WITHOUT these. Don't work without at least one other filter */
   public not?: ECSComponentFilter[]
   /** Custom search function. Please use with field `customSubscription` */
@@ -55,8 +53,6 @@ export class ECSQuery {
           all?: ECSComponentFilter[]
           /** Find entities with at least on of those */
           any?: ECSComponentFilter[]
-          /** Find entities with ONLY ONE of those. */
-          one?: ECSComponentFilter[]
           /** Find entities WITHOUT these */
           not?: ECSComponentFilter[]
           /** Custom search function. Please use with field `customSubscription` */
@@ -75,10 +71,10 @@ export class ECSQuery {
     this.fullUpdate()
   }
 
-  /** Run this function if you modified query. __Costly.__ */
+  /** Run this function if you modified query. __Expensive__ */
   public fullUpdate() {
     this.subscriptions.clear()
-    this.matches.clear()
+    this.entities.clear()
     for (let index = 0; index < types.length; index++) {
       const type = this[types[index]!]
       if (type)
@@ -101,16 +97,6 @@ export class ECSQuery {
         if (entity.has(this.any[index]!)) break
         if (index + 1 === this.any.length) return false
       }
-    if (this.one) {
-      let found = false
-      for (let index = 0; index < this.one.length; index++) {
-        if (entity.has(this.one[index]!)) {
-          if (found) return false
-          found = true
-        }
-      }
-      if (!found) return false
-    }
     if (this.not)
       for (let index = 0; index < this.not.length; index++)
         if (entity.has(this.not[index]!)) return false
@@ -120,24 +106,24 @@ export class ECSQuery {
 
   /** Update entity in query (delete/add). No components = entity destroyed  */
   public updateEntity(entity: ECSEntity, components?: ECSComponentFilter[]) {
-    const has = this.matches.has(entity)
+    const has = this.entities.has(entity)
     if (components)
       for (let index = 0; index < components.length; index++) {
         if (this.subscriptions.has(components[index]!)) {
           if (this.checkEntity(entity)) {
             if (!has) {
-              this.matches.add(entity)
+              this.entities.add(entity)
               this.added.add(entity)
             }
           } else if (has) {
-            this.matches.delete(entity)
+            this.entities.delete(entity)
             this.deleted.add(entity)
           }
           break
         }
       }
     else if (has) {
-      this.matches.delete(entity)
+      this.entities.delete(entity)
       this.deleted.add(entity)
     }
   }

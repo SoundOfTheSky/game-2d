@@ -1,23 +1,23 @@
+import { Optional } from '@softsky/utils'
+
 import ECSComponent from '@/ecs/component'
-
-import ECSEntity from '../../ecs/entity'
-import Vector2 from '../../physics/body/vector2'
-
-import { ParentComponent } from './parent.component'
+import ECSEntity from '@/ecs/entity'
+import { Matrix4 } from '@/math/matrix4'
+import { Vector3 } from '@/math/vector3'
 
 export type TransformComponentData = {
-  position: Vector2
-  scale?: number
+  position: Vector3
+  matrix: Matrix4
+  scale?: Vector3
   rotation?: number
+  pivotRotation?: number
 }
 export class TransformComponent extends ECSComponent<TransformComponentData> {
   public constructor(
     entity: ECSEntity,
-    data: Partial<TransformComponentData> = {},
+    data: Optional<TransformComponentData, 'matrix'>,
   ) {
-    data.position ??= new Vector2()
+    data.matrix ??= new Matrix4()
     super(entity, data as TransformComponentData)
   }
 }
-
-export class TransformParentComponent extends ParentComponent {}
